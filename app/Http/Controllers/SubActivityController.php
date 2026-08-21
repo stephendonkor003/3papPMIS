@@ -1,0 +1,521 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Concerns\ScopesAssignedPortfolios;
+use App\Models\SubActivity;
+use App\Models\Activity;
+use App\Models\SubActivityAllocation;
+use App\Models\Program;
+use App\Services\ActivityReallocationTracker;
+use App\Services\FundingToThinkTanksAllocationReconciler;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
+class SubActivityController extends Controller
+{
+    use ScopesAssignedPortfolios;
+
+ public function index(Request $request, ActivityReallocationTracker $reallocationTracker)
+{
+    $search = $request->search;
+
+    $currentUser = Auth::user();
+    $isPortfolioLeader = $this->userHasAssignedPortfolioScope($currentUser);
+    $scopedNodeIds = $this->scopedNodeIds();
+    if (! $isPortfolioLeader && $scopedNodeIds !== null && empty($scopedNodeIds)) {
+        abort(403, 'You do not have access to sub-activities.');
+    }
+
+    $programs = Program::with([
+        'sector',
+        'projects.allocations',
+        'projects.activities.allocations',
+        'projects.activities.subActivities.allocations' => function ($q) {
+            $q->orderBy('year', 'asc');
+        },
+    ])
+    ->when($isPortfolioLeader, function ($q) use ($currentUser) {
+        $this->applyAssignedPortfolioScopeToPrograms($q, $currentUser);
+    })
+    ->when(! $isPortfolioLeader && $scopedNodeIds !== null, function ($q) use ($scopedNodeIds) {
+        $q->whereIn('governance_node_id', $scopedNodeIds)
+          ->whereNotNull('governance_node_id');
+    })
+    ->when($search, function ($q) use ($search) {
+        $q->where(function ($q2) use ($search) {
+            $q2->where('name', 'like', "%$search%")
+              ->orWhereHas('projects', function ($p) use ($search) {
+                  $p->where('name', 'like', "%$search%");
+              })
+              ->orWhereHas('projects.activities', function ($a) use ($search) {
+                  $a->where('name', 'like', "%$search%");
+              })
+              ->orWhereHas('projects.activities.subActivities', function ($s) use ($search) {
+                  $s->where('name', 'like', "%$search%");
+              });
+        });
+    })
+    ->orderBy('name')
+    ->get();
+
+    $projects = $programs->flatMap->projects;
+    $activities = $projects->flatMap->activities;
+    $subActivities = $activities->flatMap->subActivities;
+
+    $subActivities->each(function (SubActivity $subActivity) {
+        $subActivity->setAttribute('allocation_total', (float) $subActivity->allocations->sum('amount'));
+    });
+
+    $activities->each(function (Activity $activity) {
+        $activity->setAttribute('allocation_total', (float) $activity->allocations->sum('amount'));
+        $activity->setAttribute('sub_activity_allocation_total', (float) $activity->subActivities->sum('allocation_total'));
+        $activity->setAttribute('sub_activities_count', $activity->subActivities->count());
+    });
+
+    $projects->each(function ($project) {
+        $project->setAttribute('component_allocation_total', (float) $project->allocations->sum('amount'));
+        $project->setAttribute('activity_allocation_total', (float) $project->activities->sum('allocation_total'));
+        $project->setAttribute('sub_activity_allocation_total', (float) $project->activities->sum('sub_activity_allocation_total'));
+    });
+
+    $subActivityStats = [
+        'programs' => $programs->count(),
+        'projects' => $projects->count(),
+        'activities' => $activities->count(),
+        'sub_activities' => $subActivities->count(),
+        'allocation_total' => $subActivities->sum('allocation_total'),
+    ];
+
+    $reallocationIssues = $reallocationTracker->issuesFor($activities, $projects);
+    $revertableReallocations = $reallocationTracker->revertableReallocationsFor($activities, $projects);
+    $previousReallocations = $reallocationTracker->previousReallocationsFor($activities, $projects);
+    $completableReallocations = $reallocationTracker->completableReallocationsFor($activities, $projects);
+
+    return view('subactivities.index', compact(
+        'programs',
+        'search',
+        'subActivityStats',
+        'reallocationIssues',
+        'revertableReallocations',
+        'previousReallocations',
+        'completableReallocations'
+    ));
+}
+
+
+public function create(Activity $activity)
+{
+    $this->assertActivityInScope($activity);
+    $activity->load('project.program', 'allocations');
+
+    return view('subactivities.create', compact('activity'));
+}
+
+public function show($id)
+{
+    $subActivity = SubActivity::findOrFail($id);
+    $this->assertSubActivityInScope($subActivity);
+
+    return redirect()->route('budget.subactivities.edit', $subActivity->id);
+}
+
+
+
+    public function store(Request $request)
+{
+    $request->validate([
+        'activity_id' => 'required|exists:myb_activities,id',
+        'name' => 'required|string|max:255',
+        'expected_outcome_type' => 'required|in:percentage,text',
+        'expected_outcome_percentage' => 'nullable|numeric|min:0|max:100',
+        'expected_outcome_text' => 'nullable|string|max:2000',
+    ]);
+
+    $activity = Activity::findOrFail($request->activity_id);
+    $this->assertActivityInScope($activity);
+
+    $expectedOutcomeValue = $request->expected_outcome_type === 'percentage'
+        ? (string) ($request->expected_outcome_percentage ?? '')
+        : ($request->expected_outcome_text ?? '');
+
+    if ($request->expected_outcome_type === 'percentage' && $expectedOutcomeValue === '') {
+        return back()->withErrors(['expected_outcome_percentage' => 'Expected outcome percentage is required.'])->withInput();
+    }
+
+    if ($request->expected_outcome_type === 'text' && $expectedOutcomeValue === '') {
+        return back()->withErrors(['expected_outcome_text' => 'Expected outcome description is required.'])->withInput();
+    }
+
+    // Create Sub-Activity
+    $sub = SubActivity::create([
+        'activity_id' => $request->activity_id,
+        'governance_node_id' => $activity->governance_node_id,
+        'name' => $request->name,
+        'description' => $request->description,
+        'expected_outcome_type' => $request->expected_outcome_type,
+        'expected_outcome_value' => $expectedOutcomeValue,
+        'created_by' => auth()->id(),
+    ]);
+
+    // Save allocations from the form
+    foreach ($request->allocations as $year => $amount) {
+        SubActivityAllocation::create([
+            'sub_activity_id' => $sub->id,
+            'year' => $year,
+            'amount' => $amount ?? 0,
+        ]);
+    }
+
+    // return redirect()
+    //     ->route('activities.show', $activity->id)
+    //     ->with('success', 'Sub-Activity created successfully.');
+    return redirect()
+    ->route('budget.activities.show', $activity->id)
+    ->with('success', 'Sub-Activity created successfully.');
+
+}
+
+public function edit($id, FundingToThinkTanksAllocationReconciler $allocationReconciler)
+{
+    $subActivity = SubActivity::with([
+        'allocations',
+        'activity.allocations',
+        'activity.subActivities.allocations',
+        'activity.project.program',
+    ])->findOrFail($id);
+    $this->assertSubActivityInScope($subActivity);
+
+    $fundingAllocationReconciliation = $allocationReconciler->preview($subActivity);
+
+    return view('budget.subactivities.edit', compact('subActivity', 'fundingAllocationReconciliation'));
+}
+
+public function reconcileFundingAllocation($id, FundingToThinkTanksAllocationReconciler $allocationReconciler)
+{
+    $subActivity = SubActivity::with('activity.project')->findOrFail($id);
+    $this->assertSubActivityInScope($subActivity);
+
+    try {
+        $result = $allocationReconciler->reconcile($subActivity, Auth::id());
+    } catch (\DomainException $e) {
+        return back()->with('error', $e->getMessage());
+    } catch (\Throwable $e) {
+        report($e);
+
+        return back()->with('error', 'The allocation reconciliation failed and all database changes were rolled back.');
+    }
+
+    if (! $result['changed']) {
+        return back()->with('success', 'This allocation hierarchy was already reconciled; no database changes were needed.');
+    }
+
+    return back()->with(
+        'success',
+        'Funding to Think Tanks was reconciled successfully. Audit reference: '.$result['audit_log_id'].'.'
+    );
+}
+
+public function update(Request $request, $id)
+{
+    $subActivity = SubActivity::with([
+        'allocations',
+        'activity.allocations',
+        'activity.subActivities.allocations',
+        'activity.project.program',
+    ])->findOrFail($id);
+    $this->assertSubActivityInScope($subActivity);
+
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'expected_outcome_type' => 'required|in:percentage,text',
+        'expected_outcome_percentage' => 'nullable|numeric|min:0|max:100',
+        'expected_outcome_text' => 'nullable|string|max:2000',
+        'allocations' => 'nullable|array',
+        'allocations.*' => 'nullable|numeric|min:0',
+    ], [
+        'name.required' => 'Please enter the sub-activity name.',
+        'expected_outcome_type.required' => 'Please select the expected outcome type.',
+        'allocations.array' => 'The allocation data was not submitted in the expected format.',
+        'allocations.*.numeric' => 'Sub-activity allocation amounts must be valid numbers.',
+        'allocations.*.min' => 'Sub-activity allocation amounts cannot be negative.',
+    ]);
+
+    if ($validator->fails()) {
+        return back()
+            ->withErrors($validator)
+            ->withInput()
+            ->with('error', 'Sub-activity changes were not saved. Please fix the highlighted fields.');
+    }
+
+    $expectedOutcomeValue = $request->expected_outcome_type === 'percentage'
+        ? (string) ($request->expected_outcome_percentage ?? '')
+        : ($request->expected_outcome_text ?? '');
+
+    if ($request->expected_outcome_type === 'percentage' && $expectedOutcomeValue === '') {
+        return back()->withErrors(['expected_outcome_percentage' => 'Expected outcome percentage is required.'])->withInput();
+    }
+
+    if ($request->expected_outcome_type === 'text' && $expectedOutcomeValue === '') {
+        return back()->withErrors(['expected_outcome_text' => 'Expected outcome description is required.'])->withInput();
+    }
+
+    DB::beginTransaction();
+
+    try {
+        $subActivity->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'expected_outcome_type' => $request->expected_outcome_type,
+            'expected_outcome_value' => $expectedOutcomeValue,
+        ]);
+
+        if ($request->has('allocations')) {
+            $allocations = $this->normalizeAllocations((array) $request->input('allocations', []));
+            $error = $this->validateSubActivityAllocations($subActivity, $allocations);
+            if ($error) {
+                DB::rollBack();
+                return back()->withInput()->with('error', $error);
+            }
+
+            $this->persistSubActivityAllocations($subActivity, $allocations);
+        }
+
+        DB::commit();
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        return back()
+            ->withInput()
+            ->with('error', 'Sub-activity changes were not saved because the database update failed: ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Sub-activity updated successfully.');
+}
+
+
+    public function editAllocations($id)
+{
+    $sub = SubActivity::with([
+        'allocations',
+        'activity.allocations',
+        'activity.subActivities.allocations',
+        'activity.project.program',
+    ])->findOrFail($id);
+    $this->assertSubActivityInScope($sub);
+    return view('subactivities.edit_allocations', compact('sub'));
+}
+
+public function updateAllocations(Request $request, $id)
+{
+    $sub = SubActivity::with([
+        'allocations',
+        'activity.allocations',
+        'activity.subActivities.allocations',
+        'activity.project',
+    ])->findOrFail($id);
+    $this->assertSubActivityInScope($sub);
+
+    $validator = Validator::make($request->all(), [
+        'allocations' => 'required|array|min:1',
+        'allocations.*' => 'required|numeric|min:0',
+    ], [
+        'allocations.required' => 'No allocation rows were submitted. Please enter the yearly amounts and try again.',
+        'allocations.array' => 'The allocation data was not submitted in the expected format.',
+        'allocations.min' => 'Please provide at least one yearly allocation.',
+        'allocations.*.required' => 'Every year needs an allocation amount. Use 0 where there is no budget.',
+        'allocations.*.numeric' => 'Allocation amounts must be valid numbers.',
+        'allocations.*.min' => 'Allocation amounts cannot be negative.',
+    ]);
+
+    if ($validator->fails()) {
+        return back()
+            ->withErrors($validator)
+            ->withInput()
+            ->with('error', 'Sub-activity allocations were not saved. Please fix the highlighted allocation amounts.');
+    }
+
+    $allocations = $this->normalizeAllocations((array) $request->input('allocations', []));
+    $error = $this->validateSubActivityAllocations($sub, $allocations);
+    if ($error) {
+        return back()->withInput()->with('error', $error);
+    }
+
+    try {
+        DB::transaction(fn () => $this->persistSubActivityAllocations($sub, $allocations));
+    } catch (\Throwable $e) {
+        return back()
+            ->withInput()
+            ->with('error', 'Sub-activity allocations were not saved because the database update failed: ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Sub-activity allocations updated successfully.');
+}
+
+public function destroy($id)
+{
+    $sub = SubActivity::findOrFail($id);
+    $this->assertSubActivityInScope($sub);
+
+    // Optional → delete allocations first if foreign key constraints apply
+    $sub->allocations()->delete();
+
+    $sub->delete();
+
+    return back()->with('success', 'Sub-Activity deleted successfully.');
+}
+
+    private function scopedNodeIds(): ?array
+    {
+        $currentUser = Auth::user();
+
+        if (!$currentUser || $currentUser->isAdmin() || $currentUser->isSuperAdmin()) {
+            return null;
+        }
+
+        if (!$currentUser->governance_node_id) {
+            return [];
+        }
+
+        return [$currentUser->governance_node_id];
+    }
+
+    private function assertActivityInScope(Activity $activity): void
+    {
+        $currentUser = Auth::user();
+        if ($this->userHasAssignedPortfolioScope($currentUser)) {
+            if (! $this->activityIsInAssignedPortfolio($activity, $currentUser)) {
+                abort(403, 'You do not have access to this activity.');
+            }
+
+            return;
+        }
+
+        $scopedNodeIds = $this->scopedNodeIds();
+        if ($scopedNodeIds === null) {
+            return;
+        }
+
+        $nodeId = $activity->governance_node_id ?? $activity->project?->governance_node_id;
+        if (!$nodeId || !in_array($nodeId, $scopedNodeIds, true)) {
+            abort(403, 'You do not have access to this activity.');
+        }
+    }
+
+    private function assertSubActivityInScope(SubActivity $sub): void
+    {
+        $currentUser = Auth::user();
+        if ($this->userHasAssignedPortfolioScope($currentUser)) {
+            if (! $this->subActivityIsInAssignedPortfolio($sub, $currentUser)) {
+                abort(403, 'You do not have access to this sub-activity.');
+            }
+
+            return;
+        }
+
+        $scopedNodeIds = $this->scopedNodeIds();
+        if ($scopedNodeIds === null) {
+            return;
+        }
+
+        $nodeId = $sub->governance_node_id ?? $sub->activity?->governance_node_id;
+        if (!$nodeId || !in_array($nodeId, $scopedNodeIds, true)) {
+            abort(403, 'You do not have access to this sub-activity.');
+        }
+    }
+
+    private function validateSubActivityAllocations(SubActivity $sub, array &$allocations): ?string
+    {
+        $activityYears = collect($sub->activity?->years() ?? [])->map(fn ($year) => (int) $year)->all();
+
+        if (empty($activityYears)) {
+            return 'Sub-activity allocations were not saved because the parent activity has no project years configured.';
+        }
+
+        $unexpectedYears = array_diff(array_keys($allocations), $activityYears);
+        if (!empty($unexpectedYears)) {
+            return 'Sub-activity allocations were not saved because these years do not belong to the parent activity: ' . implode(', ', $unexpectedYears) . '.';
+        }
+
+        foreach ($activityYears as $year) {
+            $allocations[$year] = $allocations[$year] ?? 0.0;
+        }
+
+        ksort($allocations);
+
+        $activityTotal = round((float) $sub->activity->allocations->sum('amount'), 2);
+        $otherSubActivitiesTotal = round((float) $sub->activity->subActivities
+            ->where('id', '!=', $sub->id)
+            ->sum(fn ($otherSubActivity) => $otherSubActivity->allocations->sum('amount')), 2);
+        $currentSubActivityTotal = round((float) $sub->allocations->sum('amount'), 2);
+        $currentCombinedTotal = round($otherSubActivitiesTotal + $currentSubActivityTotal, 2);
+        $newSubActivityTotal = round(array_sum($allocations), 2);
+        $combinedTotal = round($otherSubActivitiesTotal + $newSubActivityTotal, 2);
+
+        // Imported legacy schedules can already exceed their parent envelope.
+        // Permit corrective rephasing that does not increase that exception,
+        // while continuing to reject any new or larger over-allocation.
+        if ($combinedTotal > $activityTotal + 0.004 && $combinedTotal > $currentCombinedTotal + 0.004) {
+            return 'Sub-activity allocations were not saved because the combined sub-activity total (' . number_format($combinedTotal, 2) . ') exceeds the parent activity budget (' . number_format($activityTotal, 2) . '). Reduce this sub-activity by at least ' . number_format($combinedTotal - $activityTotal, 2) . '.';
+        }
+
+        $activityAllocationsByYear = $sub->activity->allocations->keyBy(fn ($allocation) => (int) $allocation->year);
+        foreach ($allocations as $year => $amount) {
+            $activityYearBudget = round((float) optional($activityAllocationsByYear->get($year))->amount, 2);
+            $otherSubActivitiesYearTotal = round((float) $sub->activity->subActivities
+                ->where('id', '!=', $sub->id)
+                ->sum(function ($otherSubActivity) use ($year) {
+                    return $otherSubActivity->allocations
+                        ->where('year', $year)
+                        ->sum('amount');
+                }), 2);
+            $currentAmount = round((float) $sub->allocations
+                ->where('year', $year)
+                ->sum('amount'), 2);
+            $currentCombinedYearTotal = round($otherSubActivitiesYearTotal + $currentAmount, 2);
+            $combinedYearTotal = round($otherSubActivitiesYearTotal + (float) $amount, 2);
+
+            if ($combinedYearTotal > $activityYearBudget + 0.004
+                && $combinedYearTotal > $currentCombinedYearTotal + 0.004) {
+                return 'Sub-activity allocations were not saved because year ' . $year . ' would exceed the parent activity budget. The parent activity has ' . number_format($activityYearBudget, 2) . ' for that year, while sub-activities would total ' . number_format($combinedYearTotal, 2) . '.';
+            }
+        }
+
+        return null;
+    }
+
+    private function persistSubActivityAllocations(SubActivity $sub, array $allocations): void
+    {
+        SubActivityAllocation::where('sub_activity_id', $sub->id)
+            ->whereNotIn('year', array_keys($allocations))
+            ->delete();
+
+        foreach ($allocations as $year => $amount) {
+            SubActivityAllocation::updateOrCreate(
+                [
+                    'sub_activity_id' => $sub->id,
+                    'year' => $year,
+                ],
+                [
+                    'amount' => $amount,
+                ]
+            );
+        }
+    }
+
+    private function normalizeAllocations(array $allocations): array
+    {
+        $normalized = [];
+
+        foreach ($allocations as $year => $amount) {
+            $normalized[(int) $year] = round((float) $amount, 2);
+        }
+
+        return $normalized;
+    }
+
+
+}

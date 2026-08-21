@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">3PAP icon</title>
+  <desc id="desc">3PAP portfolio and fund management platform icon</desc>
+  <defs>
+    <linearGradient id="bg" x1="32" y1="16" x2="224" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#071225"/>
+      <stop offset="1" stop-color="#0b63f6"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="64" y1="64" x2="192" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bb5ff"/>
+      <stop offset="1" stop-color="#d9ebff"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+  <path d="M62 166V90h68c28 0 46 14 46 37 0 24-18 39-46 39H90v34H62Zm28-53h34c15 0 24-6 24-18 0-11-9-17-24-17H90v35Z" fill="url(#accent)"/>
+  <path d="M144 166V90h28v76h-28Z" fill="#ffffff" opacity=".94"/>
+  <circle cx="186" cy="109" r="14" fill="#d9ebff"/>
+  <path d="M172 166c0-16 12-28 28-28h16v28h-44Z" fill="#7bb5ff"/>
+</svg>

@@ -1,0 +1,1234 @@
+/*
+|--------------------------------------------------------------------------
+| PARTNER PORTAL THEME - AFRICAN UNION COLORS
+|--------------------------------------------------------------------------
+| Official AU color scheme with professional design
+| Primary: AU Green (#007144, #00a86b)
+| Secondary: Gold accents (#F9A825)
+*/
+
+/* ======================
+   GLOBAL STYLES
+   ====================== */
+.partner-portal-body {
+    background-color: #f5f7fa;
+}
+
+/* ======================
+   PARTNER NAVIGATION SIDEBAR
+   ====================== */
+.au-partner-navigation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: linear-gradient(180deg, #005a36 0%, #007144 50%, #00a86b 100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.au-partner-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Logo Header */
+.au-partner-logo-header {
+    padding: 24px 20px;
+    background: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.au-partner-brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.au-partner-logo-lg {
+    max-height: 55px;
+    display: block;
+}
+
+.au-partner-logo-sm {
+    max-height: 40px;
+    display: none;
+}
+
+/* User Profile Section */
+.au-partner-profile {
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.au-partner-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F9A825 0%, #FBC02D 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(249, 168, 37, 0.3);
+}
+
+.au-partner-avatar i {
+    font-size: 28px;
+    color: #ffffff;
+}
+
+.au-partner-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.au-partner-name {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.au-partner-org {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.au-partner-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 0 20px;
+}
+
+/* Menu Content */
+.au-partner-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+.au-partner-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.au-partner-menu-caption {
+    padding: 20px 20px 8px 20px;
+}
+
+.au-partner-menu-caption span {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.au-partner-menu-item {
+    margin: 0 12px 4px 12px;
+}
+
+.au-partner-menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    gap: 12px;
+}
+
+.au-partner-menu-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transform: translateX(4px);
+}
+
+.au-partner-menu-item.au-active .au-partner-menu-link {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.au-partner-menu-item.au-active .au-partner-menu-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 28px;
+    background: #F9A825;
+    border-radius: 0 4px 4px 0;
+}
+
+.au-partner-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.au-partner-icon i {
+    font-size: 18px;
+}
+
+.au-partner-text {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.au-partner-badge {
+    background: #F9A825;
+    color: #1a1a1a;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Footer with Logout */
+.au-partner-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin-top: auto;
+}
+
+.au-partner-logout-btn {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.au-partner-logout-btn:hover {
+    background: rgba(249, 168, 37, 0.2);
+    border-color: #F9A825;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ======================
+   HEADER
+   ====================== */
+.partner-header {
+    background: linear-gradient(135deg, #007144 0%, #00a86b 100%) !important;
+    border-bottom: 3px solid #F9A825;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.partner-header h4 {
+    color: #ffffff !important;
+}
+
+/* ======================
+   MAIN CONTENT AREA
+   ====================== */
+.nxl-content {
+    margin-left: 280px;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ======================
+   CARDS & COMPONENTS
+   ====================== */
+.partner-portal-body .card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.partner-portal-body .card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.partner-portal-body .card-header {
+    background-color: #f8faf9;
+    border-bottom: 2px solid #e8f5e0;
+    font-weight: 600;
+    padding: 16px 20px;
+}
+
+/* ======================
+   BUTTONS
+   ====================== */
+.partner-portal-body .btn-primary {
+    background: linear-gradient(135deg, #007144 0%, #00a86b 100%);
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 113, 68, 0.2);
+}
+
+.partner-portal-body .btn-primary:hover {
+    background: linear-gradient(135deg, #005a36 0%, #007144 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 113, 68, 0.3);
+}
+
+.partner-portal-body .btn-outline-primary {
+    color: #007144;
+    border-color: #007144;
+    border-width: 2px;
+    font-weight: 600;
+}
+
+.partner-portal-body .btn-outline-primary:hover {
+    background-color: #007144;
+    border-color: #007144;
+    color: #ffffff;
+}
+
+/* ======================
+   DATA TABLES
+   ====================== */
+.partner-portal-body .data-table thead th {
+    background: linear-gradient(135deg, #007144 0%, #00a86b 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    border: none;
+}
+
+.partner-portal-body .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: linear-gradient(135deg, #007144 0%, #00a86b 100%) !important;
+    border-color: #007144 !important;
+    color: #ffffff !important;
+}
+
+.partner-portal-body .dt-buttons .btn {
+    background-color: #007144 !important;
+    color: #ffffff !important;
+    border-color: #007144 !important;
+}
+
+.partner-portal-body .dt-buttons .btn:hover {
+    background-color: #005a36 !important;
+    border-color: #005a36 !important;
+}
+
+/* ======================
+   BADGES
+   ====================== */
+.partner-portal-body .badge.bg-primary {
+    background-color: #007144 !important;
+}
+
+.partner-portal-body .badge.bg-success {
+    background-color: #00a86b !important;
+}
+
+.partner-portal-body .badge.bg-warning {
+    background-color: #F9A825 !important;
+    color: #1a1a1a !important;
+}
+
+/* ======================
+   PAGE HEADER
+   ====================== */
+.partner-portal-body .page-header {
+    padding: 24px 0;
+    border-bottom: 2px solid #e8f5e0;
+    margin-bottom: 24px;
+}
+
+.partner-portal-body .page-header h4 {
+    color: #007144;
+    font-weight: 700;
+}
+
+/* ======================
+   STATISTICS CARDS
+   ====================== */
+.partner-portal-body .card-body .text-primary {
+    color: #007144 !important;
+}
+
+.partner-portal-body .card-body .text-success {
+    color: #00a86b !important;
+}
+
+.partner-portal-body .card-body .text-warning {
+    color: #F9A825 !important;
+}
+
+/* ======================
+   ALERTS
+   ====================== */
+.partner-portal-body .alert-info {
+    background-color: #e8f5e0;
+    border-color: #00a86b;
+    color: #005a36;
+}
+
+.partner-portal-body .alert-success {
+    background-color: #e8f5e0;
+    border-color: #00a86b;
+    color: #005a36;
+}
+
+/* ======================
+   FOOTER
+   ====================== */
+.partner-footer {
+    padding: 20px 0;
+    text-align: center;
+    border-top: 2px solid #e8f5e0;
+    margin-top: 40px;
+    color: #6b7280;
+}
+
+/* ======================
+   RESPONSIVE
+   ====================== */
+@media (max-width: 992px) {
+    .au-partner-navigation {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .au-partner-navigation.active {
+        transform: translateX(0);
+    }
+
+    .nxl-content {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .au-partner-navigation {
+        width: 260px;
+    }
+
+    .au-partner-profile {
+        padding: 16px;
+    }
+
+    .au-partner-avatar {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* ======================
+   SCROLLBAR
+   ====================== */
+.au-partner-navigation::-webkit-scrollbar {
+    width: 6px;
+}
+
+.au-partner-navigation::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.au-partner-navigation::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.au-partner-navigation::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* ======================
+   ANIMATIONS
+   ====================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.partner-portal-body .card {
+    animation: fadeInUp 0.5s ease;
+}
+
+/* Mobile Toggle */
+.nxl-head-mobile-toggler {
+    display: none;
+}
+
+@media (max-width: 992px) {
+    .nxl-head-mobile-toggler {
+        display: block;
+    }
+}
+
+/* ======================
+   AGENDA 2063 HEADER STYLES
+   ====================== */
+.agenda-2063-header {
+    background: linear-gradient(135deg, #005a36 0%, #007144 50%, #00a86b 100%) !important;
+    box-shadow: 0 4px 20px rgba(0, 113, 68, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.agenda-2063-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="rgba(255,255,255,0.03)"/></svg>');
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.agenda-2063-header .header-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Agenda 2063 Branding */
+.agenda-2063-brand {
+    position: relative;
+}
+
+.au-logo-container {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 8px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.au-header-logo {
+    height: 45px;
+    width: auto;
+    filter: brightness(0) invert(1);
+}
+
+.brand-text .organization-name {
+    font-size: 1.25rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: -0.5px;
+}
+
+.agenda-tagline {
+    font-size: 0.75rem;
+    color: #F9A825;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.tagline-text {
+    display: inline-block;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.9;
+        text-shadow: 0 0 10px rgba(249, 168, 37, 0.5);
+    }
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 20px rgba(249, 168, 37, 0.8);
+    }
+}
+
+/* Agenda Info Dropdown */
+.agenda-info-dropdown {
+    position: relative;
+}
+
+.agenda-info-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.agenda-info-badge:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.agenda-info-badge i {
+    font-size: 1rem;
+}
+
+/* Agenda Dropdown Content */
+.agenda-dropdown-content {
+    min-width: 380px;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    margin-top: 8px;
+}
+
+.agenda-dropdown-header {
+    background: linear-gradient(135deg, #007144 0%, #00a86b 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px 12px 0 0;
+}
+
+.agenda-dropdown-header h6 {
+    margin-bottom: 4px;
+    font-size: 1rem;
+}
+
+.agenda-dropdown-header .small {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.agenda-aspirations {
+    padding: 12px 16px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.aspiration-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.aspiration-item:hover {
+    background: #e9ecef;
+    border-left-color: #007144;
+    transform: translateX(4px);
+}
+
+.aspiration-item i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.aspiration-item span {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Agenda Progress Banner */
+.agenda-progress-banner {
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slide-down 0.5s ease-out;
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.agenda-progress-banner .container-fluid {
+    max-width: 100%;
+}
+
+.agenda-progress-banner i {
+    animation: rotate-pulse 4s ease-in-out infinite;
+}
+
+@keyframes rotate-pulse {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(5deg);
+    }
+}
+
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .agenda-2063-brand .brand-text {
+        display: none;
+    }
+
+    .au-logo-container {
+        padding: 6px;
+    }
+
+    .au-header-logo {
+        height: 35px;
+    }
+
+    .agenda-info-dropdown {
+        display: none !important;
+    }
+
+    .agenda-dropdown-content {
+        min-width: 320px;
+    }
+
+    .agenda-progress-banner {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .organization-name {
+        font-size: 1rem !important;
+    }
+
+    .agenda-tagline {
+        font-size: 0.65rem;
+    }
+}
+
+/* Language Selector Adjustments for New Header */
+.partner-header .language-selector {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: all 0.3s ease;
+}
+
+.partner-header .language-selector:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ======================
+   TWO-ROW HEADER LAYOUT
+   ====================== */
+.agenda-2063-header {
+    padding: 0 !important;
+}
+
+.header-row-1 {
+    background: linear-gradient(135deg, #005a36 0%, #007144 50%, #00a86b 100%);
+    padding: 12px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-row-1 .header-wrapper {
+    padding: 0 24px;
+}
+
+.agenda-subtitle {
+    font-size: 0.75rem;
+    color: #F9A825;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.header-row-2 {
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.15) 50%, rgba(0, 0, 0, 0.25) 100%);
+    padding: 10px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.agenda-marketing-banner {
+    position: relative;
+    min-height: 50px;
+}
+
+.marketing-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.marketing-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    color: white;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.marketing-slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    position: relative;
+}
+
+.marketing-slide strong {
+    color: #F9A825;
+    font-weight: 600;
+}
+
+.marketing-slide i {
+    animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* ======================
+   WELCOME MODAL STYLES
+   ====================== */
+.agenda-welcome-modal {
+    background: linear-gradient(135deg, #005a36 0%, #007144 50%, #00a86b 100%);
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    min-height: 600px;
+}
+
+.agenda-welcome-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="rgba(255,255,255,0.02)"/></svg>');
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.btn-close-custom {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.btn-close-custom:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.welcome-slide {
+    display: none;
+    padding: 60px 40px 40px;
+    min-height: 600px;
+    position: relative;
+    animation: slideIn 0.8s ease-out;
+}
+
+.welcome-slide.active {
+    display: block;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-content {
+    position: relative;
+    z-index: 1;
+    min-height: 450px;
+}
+
+.au-logo-large {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.video-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.aspiration-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 250px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.aspiration-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.aspiration-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.aspiration-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.3));
+    padding: 20px;
+    color: white;
+}
+
+.aspiration-number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #F9A825;
+    line-height: 1;
+    margin-bottom: 10px;
+    font-family: 'Arial Black', sans-serif;
+}
+
+.aspiration-overlay h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.aspiration-overlay p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.appreciation-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 40px;
+    backdrop-filter: blur(10px);
+}
+
+.countdown-container {
+    margin-top: 40px;
+}
+
+.countdown-number {
+    font-size: 120px;
+    font-weight: 900;
+    color: #F9A825;
+    text-shadow: 0 0 40px rgba(249, 168, 37, 0.5);
+    animation: countdown-pulse 1s ease-in-out;
+    font-family: 'Arial Black', sans-serif;
+    line-height: 1;
+}
+
+@keyframes countdown-pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.slide-footer {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    right: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2;
+}
+
+.slide-indicators {
+    display: flex;
+    gap: 10px;
+}
+
+.indicator {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background: #F9A825;
+    width: 60px;
+}
+
+.slide-footer .btn {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.slide-footer .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Responsive Adjustments for Welcome Modal */
+@media (max-width: 768px) {
+    .welcome-slide {
+        padding: 40px 20px 20px;
+        min-height: 500px;
+    }
+
+    .slide-content {
+        min-height: 400px;
+    }
+
+    .aspiration-card {
+        height: 200px;
+        margin-bottom: 15px;
+    }
+
+    .countdown-number {
+        font-size: 80px;
+    }
+
+    .slide-footer {
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        flex-direction: column-reverse;
+        gap: 15px;
+    }
+
+    .aspiration-number {
+        font-size: 2rem;
+    }
+
+    .appreciation-card {
+        padding: 20px;
+    }
+}
+
+/* ======================
+   DRILL-DOWN NAVIGATION
+   ====================== */
+.au-has-submenu {
+    position: relative;
+}
+
+.au-arrow-icon {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.au-has-submenu.au-expanded .au-arrow-icon {
+    transform: rotate(90deg);
+}
+
+.au-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.au-submenu.au-show {
+    max-height: 2000px;
+}
+
+.au-submenu-item {
+    padding-left: 20px;
+}
+
+.au-submenu-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 8px;
+    margin: 4px 0;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    position: relative;
+}
+
+.au-submenu-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #F9A825;
+    padding-left: 20px;
+}
+
+.au-submenu-link:hover .au-submenu-icon i {
+    transform: scale(1.1);
+}
+
+.au-submenu-icon {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.au-submenu-text {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.au-submenu-level-2 {
+    padding-left: 15px;
+}
+
+.au-submenu-level-2 .au-submenu-link {
+    font-size: 0.8125rem;
+    padding: 8px 12px;
+}
+
+.au-count-badge {
+    background: #F9A825;
+    color: #005a36;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.au-collapsible-item {
+    position: relative;
+}
+
+.au-has-child,
+.au-has-child-2 {
+    position: relative;
+}
+
+/* Active states */
+.au-submenu-link.active {
+    background: rgba(249, 168, 37, 0.2);
+    color: #F9A825;
+    font-weight: 600;
+}
+
+/* Scrollbar styling for sidebar */
+.au-partner-navigation {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.au-partner-navigation::-webkit-scrollbar {
+    width: 6px;
+}
+
+.au-partner-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.au-partner-navigation::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.au-partner-navigation::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .au-submenu-text {
+        font-size: 0.8125rem;
+    }
+}

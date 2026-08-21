@@ -1,0 +1,289 @@
+@extends('layouts.app')
+@section('title', 'Create Site Visit')
+
+@section('content')
+    <main class="nxl-container">
+        <div class="nxl-content">
+
+            {{-- HEADER --}}
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h5 class="m-b-10">Create Site Visit</h5>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-body">
+
+                        {{-- ================= ERRORS ================= --}}
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('site-visits.store') }}">
+                            @csrf
+
+                            {{-- ================= BASIC INFO ================= --}}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Procurement</label>
+                                    <select name="procurement_id" id="procurement_id" class="form-control" required>
+                                        <option value="">-- Select Procurement --</option>
+                                        @foreach ($procurements as $procurement)
+                                            <option value="{{ $procurement->id }}"
+                                                {{ old('procurement_id') == $procurement->id ? 'selected' : '' }}>
+                                                {{ $procurement->title }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Applicant</label>
+                                    <select name="form_submission_id" id="form_submission_id" class="form-control" required>
+                                        <option value="">-- Select Applicant --</option>
+                                        @foreach ($submissions as $submission)
+                                            <option value="{{ $submission->id }}"
+                                                data-procurement-id="{{ $submission->procurement_id }}"
+                                                {{ old('form_submission_id') == $submission->id ? 'selected' : '' }}>
+                                                {{ $submission->display_name }} @if($submission->procurement)
+                                                    - {{ $submission->procurement->title }}
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            @if ($procurements->isEmpty())
+                                <div class="alert alert-warning">
+                                    No procurement records are available inside your portfolio scope.
+                                </div>
+                            @endif
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Visit Date</label>
+                                    <input type="date" name="visit_date" class="form-control"
+                                        value="{{ old('visit_date') }}" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Assignment Type</label>
+                                    <select name="assignment_type" id="assignment_type" class="form-control" required>
+                                        <option value="individual"
+                                            {{ old('assignment_type') === 'individual' ? 'selected' : '' }}>
+                                            Individual
+                                        </option>
+                                        <option value="group" {{ old('assignment_type') === 'group' ? 'selected' : '' }}>
+                                            Group
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            {{-- ================= INDIVIDUAL ================= --}}
+                            <div id="individual_section">
+                                <div class="mb-3">
+                                    <label class="form-label">Assign User</label>
+                                    <select name="assigned_user_id" class="form-control">
+                                        <option value="">-- Select User --</option>
+                                        @foreach ($users as $user)
+                                            <option value="{{ $user->id }}"
+                                                {{ old('assigned_user_id') == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }} — {{ $user->email }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- ================= GROUP ================= --}}
+                            <div id="group_section" style="display:none;">
+
+                                <div class="mb-3">
+                                    <label class="form-label">Group Name</label>
+                                    <input type="text" name="group_name" class="form-control"
+                                        value="{{ old('group_name') }}">
+                                </div>
+
+                                <div class="row align-items-end">
+                                    <div class="col-md-9 mb-3">
+                                        <label class="form-label">Add Group Member</label>
+                                        <select id="group_user_select" class="form-control">
+                                            <option value="">-- Select User --</option>
+                                            @foreach ($users as $user)
+                                                <option value="{{ $user->id }}" data-name="{{ $user->name }}"
+                                                    data-email="{{ $user->email }}">
+                                                    {{ $user->name }} — {{ $user->email }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
+                                        <button type="button" class="btn btn-outline-primary w-100" onclick="addMember()">
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- GROUP TABLE --}}
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th class="text-center">Leader</th>
+                                            <th width="80"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="group_table_body">
+                                        <tr id="group_empty">
+                                            <td colspan="3" class="text-center text-muted">
+                                                No members added
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary mt-3">
+                                Create Site Visit
+                            </button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    {{-- ================= JAVASCRIPT ================= --}}
+    <script>
+        const assignmentType = document.getElementById('assignment_type');
+        const procurementSelect = document.getElementById('procurement_id');
+        const submissionSelect = document.getElementById('form_submission_id');
+        const individualSection = document.getElementById('individual_section');
+        const groupSection = document.getElementById('group_section');
+        const groupSelect = document.getElementById('group_user_select');
+        const groupBody = document.getElementById('group_table_body');
+
+        const addedUsers = new Set();
+
+        function toggleAssignment() {
+            individualSection.style.display =
+                assignmentType.value === 'individual' ? 'block' : 'none';
+
+            groupSection.style.display =
+                assignmentType.value === 'group' ? 'block' : 'none';
+        }
+
+        assignmentType.addEventListener('change', toggleAssignment);
+        toggleAssignment();
+
+        function filterSubmissionsByProcurement() {
+            const procurementId = procurementSelect.value;
+            const currentValue = submissionSelect.value;
+            let currentStillAvailable = false;
+
+            Array.from(submissionSelect.options).forEach(option => {
+                if (!option.value) {
+                    option.hidden = false;
+                    return;
+                }
+
+                const matches = option.dataset.procurementId === procurementId;
+                option.hidden = !matches;
+
+                if (matches && option.value === currentValue) {
+                    currentStillAvailable = true;
+                }
+            });
+
+            if (!currentStillAvailable) {
+                submissionSelect.value = '';
+            }
+        }
+
+        procurementSelect.addEventListener('change', filterSubmissionsByProcurement);
+        filterSubmissionsByProcurement();
+
+        function addMember() {
+            const userId = groupSelect.value;
+            if (!userId || addedUsers.has(userId)) return;
+
+            const option = groupSelect.options[groupSelect.selectedIndex];
+            const name = option.dataset.name;
+            const email = option.dataset.email;
+
+            addedUsers.add(userId);
+            document.getElementById('group_empty')?.remove();
+
+            const row = document.createElement('tr');
+            row.dataset.userId = userId;
+
+            const userCell = document.createElement('td');
+            const memberName = document.createElement('strong');
+            const memberEmail = document.createElement('small');
+            const memberInput = document.createElement('input');
+
+            memberName.textContent = name || '';
+            memberEmail.className = 'text-muted';
+            memberEmail.textContent = email || '';
+            memberInput.type = 'hidden';
+            memberInput.name = 'group_members[]';
+            memberInput.value = userId;
+            userCell.append(memberName, document.createElement('br'), memberEmail, memberInput);
+
+            const leaderCell = document.createElement('td');
+            const leaderInput = document.createElement('input');
+            leaderCell.className = 'text-center';
+            leaderInput.type = 'radio';
+            leaderInput.name = 'group_leader_id';
+            leaderInput.value = userId;
+            leaderInput.required = true;
+            leaderCell.appendChild(leaderInput);
+
+            const actionCell = document.createElement('td');
+            const removeButton = document.createElement('button');
+            actionCell.className = 'text-center';
+            removeButton.type = 'button';
+            removeButton.className = 'btn btn-sm btn-outline-danger';
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => removeMember(userId, row));
+            actionCell.appendChild(removeButton);
+
+            row.append(userCell, leaderCell, actionCell);
+
+            groupBody.appendChild(row);
+            groupSelect.value = '';
+        }
+
+        function removeMember(userId, row) {
+            addedUsers.delete(userId);
+            row.remove();
+
+            if (addedUsers.size === 0) {
+                const emptyRow = document.createElement('tr');
+                const emptyCell = document.createElement('td');
+
+                emptyRow.id = 'group_empty';
+                emptyCell.colSpan = 3;
+                emptyCell.className = 'text-center text-muted';
+                emptyCell.textContent = 'No members added';
+                emptyRow.appendChild(emptyCell);
+                groupBody.replaceChildren(emptyRow);
+            }
+        }
+    </script>
+@endsection

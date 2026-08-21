@@ -1,0 +1,429 @@
+/**
+ * Custom DataTable Styling
+ * Beautiful color scheme and modern design for all data tables
+ */
+
+/* ==========================
+   DataTable Wrapper Styling
+   ========================== */
+.dataTables_wrapper {
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 0.5rem;
+}
+
+/* ==========================
+   Table Base Styling
+   ========================== */
+.data-table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* ==========================
+   Table Header Styling
+   ========================== */
+.data-table thead th {
+    background: linear-gradient(135deg, #532934 0%, #6b3545 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem !important;
+    border: none !important;
+    vertical-align: middle;
+    position: relative;
+}
+
+.data-table thead th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+.data-table thead th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+/* Sorting indicators */
+.data-table thead th.sorting,
+.data-table thead th.sorting_asc,
+.data-table thead th.sorting_desc {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.data-table thead th.sorting:hover,
+.data-table thead th.sorting_asc:hover,
+.data-table thead th.sorting_desc:hover {
+    background: linear-gradient(135deg, #6b3545 0%, #532934 100%) !important;
+}
+
+/* ==========================
+   Table Body Styling
+   ========================== */
+.data-table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.data-table tbody tr:nth-child(odd) {
+    background-color: #f8f9fa;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.data-table tbody tr:hover {
+    background: linear-gradient(90deg, #fff5f7 0%, #fffbfc 100%) !important;
+    box-shadow: 0 2px 8px rgba(83, 41, 52, 0.1);
+    transform: translateY(-1px);
+}
+
+.data-table tbody td {
+    padding: 0.875rem 0.75rem !important;
+    vertical-align: middle;
+    font-size: 0.9rem;
+    color: #495057;
+    border: none !important;
+}
+
+/* ==========================
+   Action Buttons in Tables
+   ========================== */
+.data-table tbody td .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+.data-table tbody td .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================
+   DataTable Controls
+   ========================== */
+.dataTables_length {
+    margin-bottom: 1rem;
+}
+
+.dataTables_length label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.dataTables_length select {
+    width: auto !important;
+    display: inline-block !important;
+    padding: 0.375rem 2rem 0.375rem 0.75rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.375rem !important;
+    background: #ffffff !important;
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.dataTables_length select:focus {
+    border-color: #532934 !important;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(83, 41, 52, 0.1) !important;
+}
+
+/* ==========================
+   Search Box
+   ========================== */
+.dataTables_filter {
+    margin-bottom: 1rem;
+}
+
+.dataTables_filter label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.dataTables_filter input {
+    width: 250px !important;
+    padding: 0.5rem 1rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.dataTables_filter input:focus {
+    border-color: #532934 !important;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(83, 41, 52, 0.1) !important;
+}
+
+/* ==========================
+   Export Buttons Container
+   ========================== */
+.dt-buttons {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.dt-buttons .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.dt-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Button specific colors */
+.dt-buttons .btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    color: #ffffff;
+}
+
+.dt-buttons .btn-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    color: #ffffff;
+}
+
+.dt-buttons .btn-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);
+    color: #000000;
+}
+
+.dt-buttons .btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #bb2d3b 100%);
+    color: #ffffff;
+}
+
+.dt-buttons .btn-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    color: #ffffff;
+}
+
+.dt-buttons .btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #d39e00 100%);
+    color: #000000;
+}
+
+/* ==========================
+   Pagination
+   ========================== */
+.dataTables_paginate {
+    margin-top: 1rem;
+}
+
+.dataTables_paginate .pagination {
+    gap: 0.25rem;
+}
+
+.dataTables_paginate .page-link {
+    border: 1px solid #dee2e6;
+    color: #532934;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    margin: 0 0.125rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.dataTables_paginate .page-link:hover {
+    background-color: #fff5f7;
+    border-color: #532934;
+    color: #532934;
+}
+
+.dataTables_paginate .page-item.active .page-link {
+    background: linear-gradient(135deg, #532934 0%, #6b3545 100%);
+    border-color: #532934;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(83, 41, 52, 0.3);
+}
+
+.dataTables_paginate .page-item.disabled .page-link {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+/* ==========================
+   Info Text
+   ========================== */
+.dataTables_info {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* ==========================
+   Processing Indicator
+   ========================== */
+.dataTables_processing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    margin-left: -100px;
+    margin-top: -26px;
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #532934 0%, #6b3545 100%);
+    color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
+}
+
+/* ==========================
+   Empty Table Message
+   ========================== */
+.dataTables_empty {
+    text-align: center !important;
+    padding: 2rem !important;
+    color: #6c757d;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* ==========================
+   Responsive Table
+   ========================== */
+.table-responsive {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================
+   Status Badges in Tables
+   ========================== */
+.data-table .badge {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 0.375rem;
+}
+
+/* ==========================
+   Responsive Behavior
+   ========================== */
+@media (max-width: 768px) {
+    .dataTables_wrapper .row {
+        margin: 0;
+    }
+
+    .dataTables_filter input {
+        width: 100% !important;
+    }
+
+    .dt-buttons {
+        justify-content: center;
+    }
+
+    .dataTables_length,
+    .dataTables_filter,
+    .dataTables_info,
+    .dataTables_paginate {
+        text-align: center;
+    }
+}
+
+/* ==========================
+   Column Visibility Toggle
+   ========================== */
+.dt-button-collection {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem;
+}
+
+.dt-button-collection .dt-button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+}
+
+.dt-button-collection .dt-button:hover {
+    background: #f8f9fa;
+}
+
+.dt-button-collection .dt-button.active {
+    background: #fff5f7;
+    color: #532934;
+    font-weight: 600;
+}
+
+/* ==========================
+   Collapsed/Child Rows
+   ========================== */
+tr.child-row {
+    background-color: #f8f9fa !important;
+}
+
+tr.child-row td {
+    border-top: none !important;
+    padding: 0 !important;
+}
+
+tr.child-row.collapse:not(.show) {
+    display: none !important;
+}
+
+tr.child-row .border.rounded {
+    margin: 0.5rem;
+}
+
+/* ==========================
+   Dark Mode Support (Optional)
+   ========================== */
+[data-theme="dark"] .dataTables_wrapper {
+    background: #1a1a1a;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .data-table tbody tr:nth-child(odd) {
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .data-table tbody tr:nth-child(even) {
+    background-color: #1a1a1a;
+}
+
+[data-theme="dark"] .data-table tbody tr:hover {
+    background: linear-gradient(90deg, #2a1f21 0%, #352429 100%) !important;
+}
+
+[data-theme="dark"] .dataTables_filter input,
+[data-theme="dark"] .dataTables_length select {
+    background: #2a2a2a !important;
+    color: #e0e0e0 !important;
+    border-color: #444 !important;
+}
+
+[data-theme="dark"] tr.child-row {
+    background-color: #2a2a2a !important;
+}

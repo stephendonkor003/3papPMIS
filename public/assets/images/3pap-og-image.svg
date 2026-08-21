@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">3PAP social preview image</title>
+  <desc id="desc">3PAP portfolio, program, project cycle and fund management software</desc>
+  <defs>
+    <linearGradient id="bg" x1="92" y1="46" x2="1104" y2="604" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#071225"/>
+      <stop offset="0.58" stop-color="#0a2347"/>
+      <stop offset="1" stop-color="#0b63f6"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="760" y1="150" x2="1088" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".08"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1090" cy="72" r="190" fill="#ffffff" opacity=".08"/>
+  <circle cx="160" cy="640" r="180" fill="#63a7ff" opacity=".12"/>
+  <rect x="768" y="144" width="320" height="80" rx="20" fill="url(#panel)" stroke="rgba(255,255,255,.18)"/>
+  <rect x="768" y="246" width="320" height="80" rx="20" fill="url(#panel)" stroke="rgba(255,255,255,.18)"/>
+  <rect x="768" y="348" width="320" height="80" rx="20" fill="url(#panel)" stroke="rgba(255,255,255,.18)"/>
+  <rect x="768" y="450" width="320" height="80" rx="20" fill="url(#panel)" stroke="rgba(255,255,255,.18)"/>
+  <text x="108" y="136" fill="#92c3ff" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="6">ENTERPRISE PMO PLATFORM</text>
+  <rect x="108" y="172" width="132" height="132" rx="28" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.24)"/>
+  <text x="132" y="255" fill="#ffffff" font-family="Arial, sans-serif" font-size="46" font-weight="800" letter-spacing="2">3PAP</text>
+  <text x="108" y="360" fill="#ffffff" font-family="Arial, sans-serif" font-size="64" font-weight="800">Portfolio, Program,</text>
+  <text x="108" y="432" fill="#ffffff" font-family="Arial, sans-serif" font-size="64" font-weight="800">Project Cycle and Fund</text>
+  <text x="108" y="504" fill="#ffffff" font-family="Arial, sans-serif" font-size="64" font-weight="800">Management Software</text>
+  <text x="108" y="566" fill="#d6e5ff" font-family="Arial, sans-serif" font-size="28">Governance, budgeting, approvals, reporting, and transparent fund control in one platform.</text>
+  <text x="802" y="194" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">Portfolio governance</text>
+  <text x="802" y="296" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">Program oversight</text>
+  <text x="802" y="398" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">Project cycle control</text>
+  <text x="802" y="500" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">Fund management</text>
+</svg>
