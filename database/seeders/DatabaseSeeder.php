@@ -26,8 +26,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            LegacyThinkTankProcurementLifecycleSeeder::class,
-            LegacySiteVisitSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
             GeoRegionSeeder::class,
@@ -43,17 +41,10 @@ class DatabaseSeeder extends Seeder
             HrGovernancePermissionsSeeder::class,
             AssignPartnerPermissionsSeeder::class,
             ProcurementPermissionsSeeder::class,
-            AttpAiGuideSettingSeeder::class,
-            DiscussionSeeder::class,
-            AttpBudgetStructureSeeder::class,
-            ApprovedWorkPlanSeeder::class,
-            AttpWorkPlan2025Seeder::class,
-            ConsortiumThinkTankMembershipSeeder::class,
-            AttpMelFrameworkSeeder::class,
-            BiAnnualSiteVisitQuestionnaireSeeder::class,
             RolePermissionSeeder::class,
             SystemAdminAccessSeeder::class,
             MasterAdminSeeder::class,
+            KenyaGovernmentSeeder::class,
         ]);
     }
 }

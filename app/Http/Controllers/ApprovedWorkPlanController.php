@@ -14,11 +14,11 @@ use App\Models\PurchaseRequest;
 use App\Models\PurchaseRequestItem;
 use App\Models\Resource;
 use App\Models\ResourceCategory;
-use App\Models\SystemAuditLog;
 use App\Models\SubActivity;
+use App\Models\SystemAuditLog;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +40,7 @@ class ApprovedWorkPlanController extends Controller
     public function exportRegistryPdf(Request $request)
     {
         $data = $this->workPlanRegistryData($request);
-        $filename = 'work-plans-registry-' . now()->format('Ymd-His') . '.pdf';
+        $filename = 'work-plans-registry-'.now()->format('Ymd-His').'.pdf';
 
         return Pdf::loadView('finance.awp.registry-pdf', $data)
             ->setPaper('a4', 'landscape')
@@ -50,7 +50,7 @@ class ApprovedWorkPlanController extends Controller
     public function exportRegistryExcel(Request $request)
     {
         $data = $this->workPlanRegistryData($request);
-        $filename = 'work-plans-registry-' . now()->format('Ymd-His') . '.xlsx';
+        $filename = 'work-plans-registry-'.now()->format('Ymd-His').'.xlsx';
 
         return Excel::download(new ApprovedWorkPlanRegistryExport(
             $data['folders'],
@@ -382,7 +382,7 @@ class ApprovedWorkPlanController extends Controller
                     ],
                     [
                         'governance_node_id' => $resourceGovernanceNodeId,
-                        'reference_code' => 'AWP-' . $year . '-' . Str::upper(Str::random(5)),
+                        'reference_code' => 'AWP-'.$year.'-'.Str::upper(Str::random(5)),
                         'description' => $subActivity->description ?: $activity?->name,
                         'status' => 'active',
                         'is_human_resource' => false,
@@ -540,7 +540,6 @@ class ApprovedWorkPlanController extends Controller
             $year,
             $folderName,
             $funding,
-            $program,
             $currency,
             &$created,
             &$createdAmount
@@ -571,7 +570,7 @@ class ApprovedWorkPlanController extends Controller
                     'resource_category_id' => $category->id,
                     'governance_node_id' => $resourceGovernanceNodeId,
                     'name' => $title,
-                    'reference_code' => ($row['budget_code'] ?? null) ?: 'AWP-' . $year . '-' . Str::upper(Str::random(5)),
+                    'reference_code' => ($row['budget_code'] ?? null) ?: 'AWP-'.$year.'-'.Str::upper(Str::random(5)),
                     'description' => ($row['result_indicator'] ?? null) ?: $subActivity->name,
                     'status' => 'active',
                     'is_human_resource' => false,
@@ -982,7 +981,7 @@ class ApprovedWorkPlanController extends Controller
             $purchaseRequest->update([
                 'allocation_id' => $selectedSubActivity->id,
                 'total_amount' => $amount,
-                'description' => 'FY' . ($purchaseRequest->start_year ?: now()->year) . ' ATTP work plan item: ' . $data['activity'],
+                'description' => 'FY'.($purchaseRequest->start_year ?: now()->year).' ATTP work plan item: '.$data['activity'],
             ]);
 
             foreach ($purchaseRequest->commitments as $commitment) {
@@ -991,14 +990,14 @@ class ApprovedWorkPlanController extends Controller
                     'resource_id' => $resource->id,
                     'allocation_id' => $selectedSubActivity->id,
                     'commitment_amount' => $amount,
-                    'description' => 'FY' . ($commitment->commitment_year ?: $purchaseRequest->start_year) . ' ATTP work plan commitment: ' . $data['activity'],
+                    'description' => 'FY'.($commitment->commitment_year ?: $purchaseRequest->start_year).' ATTP work plan commitment: '.$data['activity'],
                 ]);
 
                 $commitment->approvedWorkPlans()->update([
                     'title' => $data['activity'],
                     'planned_amount' => $amount,
                     'expected_outputs' => $data['result_indicator'] ?: $data['intermediate_indicator'],
-                    'implementation_notes' => trim(($data['observations'] ?? '') . "\n" . ($data['attp_secretariat_comments'] ?? '')) ?: null,
+                    'implementation_notes' => trim(($data['observations'] ?? '')."\n".($data['attp_secretariat_comments'] ?? '')) ?: null,
                 ]);
             }
         }
@@ -1066,12 +1065,12 @@ class ApprovedWorkPlanController extends Controller
                 $resourceGovernanceNodeId
             );
         }
-        $resource = $item->resource ?: new Resource();
+        $resource = $item->resource ?: new Resource;
         $resource->fill([
             'resource_category_id' => $category->id,
             'governance_node_id' => $resource->governance_node_id ?: $resourceGovernanceNodeId,
             'name' => $data['activity'],
-            'reference_code' => $resource->reference_code ?: $data['budget_code'] ?: 'AWP-' . $year . '-' . Str::upper(Str::random(5)),
+            'reference_code' => $resource->reference_code ?: $data['budget_code'] ?: 'AWP-'.$year.'-'.Str::upper(Str::random(5)),
             'description' => $data['result_indicator'] ?: null,
             'status' => 'active',
             'is_human_resource' => false,
@@ -1162,6 +1161,7 @@ class ApprovedWorkPlanController extends Controller
 
             if ($purchaseRequest->items->count() <= 1) {
                 $purchaseRequest->delete();
+
                 return;
             }
 
@@ -1293,7 +1293,6 @@ class ApprovedWorkPlanController extends Controller
         ApprovedWorkPlan::create([
             ...$data,
             'awp_code' => $data['awp_code'] ?? $this->nextCode(),
-            'currency' => 'USD',
             'created_by' => $request->user()?->id,
         ]);
 
@@ -1306,13 +1305,10 @@ class ApprovedWorkPlanController extends Controller
         abort_if($awp->status === 'approved' && ! $request->user()?->can('finance.awp.approve'), 403);
 
         $data = $this->validated($request, $awp);
-        $this->hydrateFromCommitment($data);
+        $this->hydrateFromCommitment($data, $awp->currency);
         $this->assertAwpPayloadInScope($data, $request->user());
 
-        $awp->update([
-            ...$data,
-            'currency' => 'USD',
-        ]);
+        $awp->update($data);
 
         return back()->with('success', 'Approved Work Plan updated.');
     }
@@ -1379,9 +1375,14 @@ class ApprovedWorkPlanController extends Controller
         ]);
     }
 
-    private function hydrateFromCommitment(array &$data): void
+    private function hydrateFromCommitment(array &$data, ?string $fallbackCurrency = null): void
     {
         if (empty($data['budget_commitment_id'])) {
+            $funding = ! empty($data['program_funding_id'])
+                ? ProgramFunding::whereKey($data['program_funding_id'])->first()
+                : null;
+            $data['currency'] = $funding?->resolved_currency ?: $fallbackCurrency ?: 'USD';
+
             return;
         }
 
@@ -1394,17 +1395,18 @@ class ApprovedWorkPlanController extends Controller
         $data['fiscal_year'] = $data['fiscal_year'] ?: (string) $commitment->commitment_year;
         $data['planned_amount'] = (float) ($data['planned_amount'] ?: $commitment->commitment_amount);
         $data['governance_node_id'] = $commitment->governance_node_id;
+        $data['currency'] = $commitment->resolved_currency;
     }
 
     private function nextCode(): string
     {
-        return 'AWP-' . now()->format('Ymd') . '-' . Str::upper(Str::random(5));
+        return 'AWP-'.now()->format('Ymd').'-'.Str::upper(Str::random(5));
     }
 
     private function nextWorkPlanCode(int $year): string
     {
         do {
-            $code = 'AWP-' . $year . '-' . Str::upper(Str::random(6));
+            $code = 'AWP-'.$year.'-'.Str::upper(Str::random(6));
         } while (ApprovedWorkPlan::where('awp_code', $code)->exists());
 
         return $code;
@@ -1413,7 +1415,7 @@ class ApprovedWorkPlanController extends Controller
     private function nextPurchaseRequestReference(string $prefix = 'PR'): string
     {
         do {
-            $reference = $prefix . '-' . now()->year . '-' . Str::upper(Str::random(5));
+            $reference = $prefix.'-'.now()->year.'-'.Str::upper(Str::random(5));
         } while (PurchaseRequest::where('reference_no', $reference)->exists());
 
         return $reference;
@@ -1467,7 +1469,7 @@ class ApprovedWorkPlanController extends Controller
     {
         $name = trim((string) ($program->program_id ?: $program->name));
 
-        return 'Work Plan for ' . ($name ?: 'Program');
+        return 'Work Plan for '.($name ?: 'Program');
     }
 
     private function folderOptionsForProgramYear(array $fundingIds, int $year)
@@ -1671,8 +1673,9 @@ class ApprovedWorkPlanController extends Controller
         }
 
         if ($amount > $available + 0.01) {
+            $currency = $subActivity->activity?->project?->program?->currency ?: 'USD';
             throw ValidationException::withMessages([
-                'estimated_amount' => "The work plan amount for {$subActivity->name} cannot exceed the available {$year} allocation of USD " . number_format($available, 2) . '.',
+                'estimated_amount' => "The work plan amount for {$subActivity->name} cannot exceed the available {$year} allocation of {$currency} ".number_format($available, 2).'.',
             ]);
         }
     }
@@ -1682,7 +1685,7 @@ class ApprovedWorkPlanController extends Controller
         $projectCode = $project?->project_id ?: 'PROJECT';
         $subCode = Str::upper(Str::substr(str_replace('-', '', (string) $subActivity->id), 0, 6));
 
-        return Str::limit($projectCode . '-WP-' . $year . '-' . $subCode, 120, '');
+        return Str::limit($projectCode.'-WP-'.$year.'-'.$subCode, 120, '');
     }
 
     private function resolveFilters(Request $request): array
@@ -1731,7 +1734,7 @@ class ApprovedWorkPlanController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'label' => $startDate && $endDate
-                ? $startDate->format('M d, Y') . ' - ' . $endDate->format('M d, Y')
+                ? $startDate->format('M d, Y').' - '.$endDate->format('M d, Y')
                 : 'All available work plan items',
         ];
     }
@@ -1753,7 +1756,7 @@ class ApprovedWorkPlanController extends Controller
                 ->get()
                 ->filter(function (PurchaseRequest $request) use ($filters) {
                     $date = $this->resolveRequestDate($request);
-                    if (!$filters['start_date'] || !$filters['end_date']) {
+                    if (! $filters['start_date'] || ! $filters['end_date']) {
                         return true;
                     }
 
@@ -1769,108 +1772,108 @@ class ApprovedWorkPlanController extends Controller
             $activities = $project->activities
                 ->sortBy(fn ($activity) => $this->sortKeyForActivity($activity, $requestsBySubActivity))
                 ->map(function ($activity) use ($requestsBySubActivity, &$projectTotal, &$projectCounts) {
-                $activityTotal = 0;
-                $activityCounts = $this->emptyStatusCounts();
+                    $activityTotal = 0;
+                    $activityCounts = $this->emptyStatusCounts();
 
-                $subActivities = $activity->subActivities
-                    ->sortBy(fn ($subActivity) => $this->sortKeyForSubActivity($subActivity, $requestsBySubActivity))
-                    ->map(function ($subActivity) use ($requestsBySubActivity, &$activityTotal, &$activityCounts, &$projectTotal, &$projectCounts) {
-                    $items = collect($requestsBySubActivity[$subActivity->id] ?? [])
-                        ->flatMap(function (PurchaseRequest $request) {
-                            $requestCommitmentAmount = $this->committedAmountForRequest($request);
-                            $requestItemAmount = (float) $request->items->sum('amount');
+                    $subActivities = $activity->subActivities
+                        ->sortBy(fn ($subActivity) => $this->sortKeyForSubActivity($subActivity, $requestsBySubActivity))
+                        ->map(function ($subActivity) use ($requestsBySubActivity, &$activityTotal, &$activityCounts, &$projectTotal, &$projectCounts) {
+                            $items = collect($requestsBySubActivity[$subActivity->id] ?? [])
+                                ->flatMap(function (PurchaseRequest $request) {
+                                    $requestCommitmentAmount = $this->committedAmountForRequest($request);
+                                    $requestItemAmount = (float) $request->items->sum('amount');
 
-                            return $request->items
-                                ->sortBy(fn (PurchaseRequestItem $item) => $this->sortKeyForItem($item))
-                                ->map(function (PurchaseRequestItem $item) use ($request, $requestCommitmentAmount, $requestItemAmount) {
-                                $review = $item->awpReview;
-                                $status = $review?->status ?? 'pending';
-                                $commitmentAmount = $this->commitmentAmountForItem(
-                                    $item,
-                                    $requestCommitmentAmount,
-                                    $requestItemAmount
-                                );
-                                $months = $this->normalizeWorkPlanMonths($item->work_plan_months ?? []);
-                                $paymentBasis = $this->normalizePaymentBasis($item->work_plan_payment_basis, [
-                                    'activity' => $item->resource?->name ?? $item->milestone ?? '',
-                                    'object_type' => $item->object_type,
-                                    'observations' => $item->observations,
-                                    'intermediate_indicator' => $item->intermediate_indicator,
-                                ], $months);
-                                $personMonths = $item->work_plan_person_months ?: ($paymentBasis === 'monthly' ? count($months) : null);
-                                $monthlyAmount = $item->work_plan_monthly_amount
-                                    ?: (($paymentBasis === 'monthly' && $personMonths > 0) ? round($commitmentAmount / $personMonths, 2) : null);
+                                    return $request->items
+                                        ->sortBy(fn (PurchaseRequestItem $item) => $this->sortKeyForItem($item))
+                                        ->map(function (PurchaseRequestItem $item) use ($request, $requestCommitmentAmount, $requestItemAmount) {
+                                            $review = $item->awpReview;
+                                            $status = $review?->status ?? 'pending';
+                                            $commitmentAmount = $this->commitmentAmountForItem(
+                                                $item,
+                                                $requestCommitmentAmount,
+                                                $requestItemAmount
+                                            );
+                                            $months = $this->normalizeWorkPlanMonths($item->work_plan_months ?? []);
+                                            $paymentBasis = $this->normalizePaymentBasis($item->work_plan_payment_basis, [
+                                                'activity' => $item->resource?->name ?? $item->milestone ?? '',
+                                                'object_type' => $item->object_type,
+                                                'observations' => $item->observations,
+                                                'intermediate_indicator' => $item->intermediate_indicator,
+                                            ], $months);
+                                            $personMonths = $item->work_plan_person_months ?: ($paymentBasis === 'monthly' ? count($months) : null);
+                                            $monthlyAmount = $item->work_plan_monthly_amount
+                                                ?: (($paymentBasis === 'monthly' && $personMonths > 0) ? round($commitmentAmount / $personMonths, 2) : null);
 
-                                return [
-                                    'item' => $item,
-                                    'purchaseRequest' => $request,
-                                    'label' => $item->resource?->name
-                                        ?? $item->resourceCategory?->name
-                                        ?? $item->milestone
-                                        ?? $request->description
-                                        ?? 'Work plan item',
-                                    'amount' => $commitmentAmount,
-                                    'status' => $status,
-                                    'status_label' => $this->formatWorldBankStatus($status),
-                                    'review' => $review,
-                                    'is_placeholder' => false,
-                                    'month_keys' => $months,
-                                    'month_labels' => $this->workPlanMonthLabelsFor($months),
-                                    'month_text' => $this->workPlanMonthText($months),
-                                    'payment_basis' => $paymentBasis,
-                                    'payment_basis_label' => $this->workPlanPaymentBasisLabel($paymentBasis),
-                                    'person_months' => $personMonths,
-                                    'monthly_amount' => $monthlyAmount,
-                                ];
-                            });
+                                            return [
+                                                'item' => $item,
+                                                'purchaseRequest' => $request,
+                                                'label' => $item->resource?->name
+                                                    ?? $item->resourceCategory?->name
+                                                    ?? $item->milestone
+                                                    ?? $request->description
+                                                    ?? 'Work plan item',
+                                                'amount' => $commitmentAmount,
+                                                'status' => $status,
+                                                'status_label' => $this->formatWorldBankStatus($status),
+                                                'review' => $review,
+                                                'is_placeholder' => false,
+                                                'month_keys' => $months,
+                                                'month_labels' => $this->workPlanMonthLabelsFor($months),
+                                                'month_text' => $this->workPlanMonthText($months),
+                                                'payment_basis' => $paymentBasis,
+                                                'payment_basis_label' => $this->workPlanPaymentBasisLabel($paymentBasis),
+                                                'person_months' => $personMonths,
+                                                'monthly_amount' => $monthlyAmount,
+                                            ];
+                                        });
+                                })->values();
+
+                            if ($items->isEmpty()) {
+                                $items = collect([
+                                    [
+                                        'item' => null,
+                                        'purchaseRequest' => null,
+                                        'label' => 'No work plan item recorded',
+                                        'amount' => 0.0,
+                                        'status' => 'pending',
+                                        'status_label' => 'Not approved by World Bank',
+                                        'review' => null,
+                                        'is_placeholder' => true,
+                                        'month_keys' => [],
+                                        'month_labels' => [],
+                                        'month_text' => null,
+                                        'payment_basis' => 'scheduled',
+                                        'payment_basis_label' => 'Scheduled activity',
+                                        'person_months' => null,
+                                        'monthly_amount' => null,
+                                    ],
+                                ]);
+                            }
+
+                            $subTotal = (float) $items->sum('amount');
+                            $subCounts = $this->countItemStatuses($items);
+
+                            $activityTotal += $subTotal;
+                            $projectTotal += $subTotal;
+                            $activityCounts = $this->mergeStatusCounts($activityCounts, $subCounts);
+                            $projectCounts = $this->mergeStatusCounts($projectCounts, $subCounts);
+
+                            return [
+                                'subActivity' => $subActivity,
+                                'allocation_years' => $this->subActivityAllocationYears($subActivity),
+                                'items' => $items,
+                                'total' => $subTotal,
+                                'counts' => $subCounts,
+                            ];
                         })->values();
 
-                    if ($items->isEmpty()) {
-                        $items = collect([
-                            [
-                                'item' => null,
-                                'purchaseRequest' => null,
-                                'label' => 'No work plan item recorded',
-                                'amount' => 0.0,
-                                'status' => 'pending',
-                                'status_label' => 'Not approved by World Bank',
-                                'review' => null,
-                                'is_placeholder' => true,
-                                'month_keys' => [],
-                                'month_labels' => [],
-                                'month_text' => null,
-                                'payment_basis' => 'scheduled',
-                                'payment_basis_label' => 'Scheduled activity',
-                                'person_months' => null,
-                                'monthly_amount' => null,
-                            ],
-                        ]);
-                    }
-
-                    $subTotal = (float) $items->sum('amount');
-                    $subCounts = $this->countItemStatuses($items);
-
-                    $activityTotal += $subTotal;
-                    $projectTotal += $subTotal;
-                    $activityCounts = $this->mergeStatusCounts($activityCounts, $subCounts);
-                    $projectCounts = $this->mergeStatusCounts($projectCounts, $subCounts);
-
                     return [
-                        'subActivity' => $subActivity,
-                        'allocation_years' => $this->subActivityAllocationYears($subActivity),
-                        'items' => $items,
-                        'total' => $subTotal,
-                        'counts' => $subCounts,
+                        'activity' => $activity,
+                        'subActivities' => $subActivities,
+                        'total' => $activityTotal,
+                        'counts' => $activityCounts,
                     ];
                 })->values();
-
-                return [
-                    'activity' => $activity,
-                    'subActivities' => $subActivities,
-                    'total' => $activityTotal,
-                    'counts' => $activityCounts,
-                ];
-            })->values();
 
             return [
                 'project' => $project,
@@ -2047,7 +2050,7 @@ class ApprovedWorkPlanController extends Controller
                     'governance_node_id' => $nodeId,
                 ],
                 [
-                    'description' => $name . ' for ATTP work plan items',
+                    'description' => $name.' for ATTP work plan items',
                     'status' => 'active',
                     'created_by' => $createdBy,
                 ]
@@ -2057,7 +2060,7 @@ class ApprovedWorkPlanController extends Controller
         return ResourceCategory::firstOrCreate(
             ['name' => $name],
             [
-                'description' => $name . ' for ATTP work plan items',
+                'description' => $name.' for ATTP work plan items',
                 'status' => 'active',
                 'created_by' => $createdBy,
             ]
@@ -2067,12 +2070,12 @@ class ApprovedWorkPlanController extends Controller
     private function syncWorkPlanResource(PurchaseRequestItem $item, ResourceCategory $category, array $data, ?string $createdBy, ?string $governanceNodeId = null): Resource
     {
         $item->loadMissing('purchaseRequest');
-        $resource = $item->resource ?: new Resource();
+        $resource = $item->resource ?: new Resource;
         $resource->fill([
             'resource_category_id' => $category->id,
             'governance_node_id' => $resource->governance_node_id ?: $governanceNodeId ?: $item->purchaseRequest?->governance_node_id,
             'name' => $data['activity'],
-            'reference_code' => $data['budget_code'] ?: $resource->reference_code ?: 'AWP-' . now()->year . '-' . Str::upper(Str::random(5)),
+            'reference_code' => $data['budget_code'] ?: $resource->reference_code ?: 'AWP-'.now()->year.'-'.Str::upper(Str::random(5)),
             'description' => $data['intermediate_indicator'] ?: $data['result_indicator'] ?: null,
             'status' => 'active',
             'is_human_resource' => $this->normalizeWorkPlanText((string) ($data['object_type'] ?? '')) === 'consulting',
@@ -2097,7 +2100,7 @@ class ApprovedWorkPlanController extends Controller
             return sprintf('%03d-%s', (int) $matches[1], Str::lower($project->name));
         }
 
-        return '999-' . Str::lower((string) $project->name);
+        return '999-'.Str::lower((string) $project->name);
     }
 
     private function sortKeyForActivity($activity, $requestsBySubActivity): string

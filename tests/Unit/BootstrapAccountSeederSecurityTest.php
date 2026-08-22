@@ -11,10 +11,12 @@ it('runs deployment super-admin provisioning last while keeping unsafe imports o
         ->toContain('MasterAdminSeeder::class')
         ->not->toContain('SecondarySuperAdminSeeder::class')
         ->not->toContain('WorldBankPartnerAccessSeeder::class')
-        ->toContain('ConsortiumThinkTankMembershipSeeder::class');
+        ->not->toContain('ConsortiumThinkTankMembershipSeeder::class')
+        ->toContain('KenyaGovernmentSeeder::class');
 
     expect(strpos($defaultSeeder, 'MasterAdminSeeder::class'))
-        ->toBeGreaterThan(strpos($defaultSeeder, 'SystemAdminAccessSeeder::class'));
+        ->toBeGreaterThan(strpos($defaultSeeder, 'SystemAdminAccessSeeder::class'))
+        ->toBeLessThan(strpos($defaultSeeder, 'KenyaGovernmentSeeder::class'));
 });
 
 it('provisions optional direct bootstrap accounts without committed or reusable passwords', function () {
