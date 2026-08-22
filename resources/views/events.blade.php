@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
-@section('title', 'Events & Webinars | 3PAP PMIS')
-@section('description', 'Discover 3PAP PMIS events, product demonstrations and practitioner sessions for connected, accountable portfolio delivery.')
+@section('title', __('events.meta.title'))
+@section('description', __('events.meta.description'))
 
 @push('styles')
     <style>
@@ -188,7 +188,7 @@
             align-items: center;
             padding: clamp(1.35rem, 3vw, 2rem);
             border: 1px solid var(--pmis-line);
-            border-left: 4px solid var(--pmis-blue-600);
+            border-inline-start: 4px solid var(--pmis-blue-600);
             border-radius: 1rem;
             background: #fff;
             box-shadow: 0 15px 42px rgba(6, 21, 47, .07);
@@ -211,7 +211,7 @@
             overflow: hidden;
         }
 
-        .pmis-events__format::after { position: absolute; right: -2rem; bottom: -2rem; width: 7rem; height: 7rem; border: 1.25rem solid var(--pmis-blue-50); border-radius: 50%; content: ''; }
+        .pmis-events__format::after { position: absolute; inset-inline-end: -2rem; bottom: -2rem; width: 7rem; height: 7rem; border: 1.25rem solid var(--pmis-blue-50); border-radius: 50%; content: ''; }
         .pmis-events__format-number { display: block; margin-bottom: 2.4rem; color: var(--pmis-blue-600); font-size: .78rem; font-weight: 800; letter-spacing: .13em; }
         .pmis-events__format h3 { margin: 0; color: var(--pmis-ink); font-size: 1.15rem; }
         .pmis-events__format p { position: relative; z-index: 1; margin: .7rem 0 0; color: var(--pmis-muted); font-size: .92rem; line-height: 1.65; }
@@ -264,27 +264,24 @@
         <section class="pmis-events__hero" aria-labelledby="events-title">
             <div class="pmis-events__wrap pmis-events__hero-grid">
                 <div>
-                    <p class="pmis-events__eyebrow">3PAP PMIS knowledge exchange</p>
-                    <h1 id="events-title">Events &amp; Webinars</h1>
-                    <p class="pmis-events__lead">
-                        Practical conversations for leaders and delivery teams turning strategy into visible,
-                        governed execution across portfolios, programmes, projects and funds.
-                    </p>
+                    <p class="pmis-events__eyebrow">{{ __('events.hero.eyebrow') }}</p>
+                    <h1 id="events-title">{{ __('events.hero.title') }}</h1>
+                    <p class="pmis-events__lead">{{ __('events.hero.lead') }}</p>
                     <div class="pmis-events__actions">
-                        <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.com?subject=3PAP%20PMIS%20event%20enquiry">
-                            Ask about upcoming sessions <span aria-hidden="true">&rarr;</span>
+                        <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.com?subject={{ rawurlencode(__('events.hero.mail_subject')) }}">
+                            {{ __('events.hero.ask') }} <span aria-hidden="true">&rarr;</span>
                         </a>
-                        <a class="pmis-events__button pmis-events__button--quiet" href="{{ route('applicants.faq') }}">Explore PMIS FAQs</a>
+                        <a class="pmis-events__button pmis-events__button--quiet" href="{{ route('applicants.faq') }}">{{ __('events.hero.faqs') }}</a>
                     </div>
                 </div>
 
-                <aside class="pmis-events__brief" aria-label="Session focus">
-                    <p class="pmis-events__brief-label"><span class="pmis-events__pulse" aria-hidden="true"></span> Session focus</p>
-                    <h2>One governed view of enterprise delivery</h2>
+                <aside class="pmis-events__brief" aria-label="{{ __('events.brief.aria_label') }}">
+                    <p class="pmis-events__brief-label"><span class="pmis-events__pulse" aria-hidden="true"></span> {{ __('events.brief.label') }}</p>
+                    <h2>{{ __('events.brief.title') }}</h2>
                     <ul class="pmis-events__brief-list">
-                        <li><span aria-hidden="true">01</span>Portfolio and programme visibility for decision-makers</li>
-                        <li><span aria-hidden="true">02</span>Connected funding, procurement, risk and performance workflows</li>
-                        <li><span aria-hidden="true">03</span>Traceable evidence and decision-ready reporting</li>
+                        @foreach (trans('events.brief.items') as $item)
+                            <li><span aria-hidden="true">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>{{ $item }}</li>
+                        @endforeach
                     </ul>
                 </aside>
             </div>
@@ -294,9 +291,9 @@
             <div class="pmis-events__wrap">
                 <div class="pmis-events__section-heading">
                     <div>
-                        <p class="pmis-events__section-kicker">Schedule</p>
-                        <h2 id="schedule-title">Upcoming public sessions</h2>
-                        <p>Confirmed sessions will be published here with the date, format, audience and registration details.</p>
+                        <p class="pmis-events__section-kicker">{{ __('events.schedule.kicker') }}</p>
+                        <h2 id="schedule-title">{{ __('events.schedule.title') }}</h2>
+                        <p>{{ __('events.schedule.description') }}</p>
                     </div>
                 </div>
 
@@ -308,10 +305,10 @@
                         </svg>
                     </div>
                     <div>
-                        <h3>No public sessions are currently scheduled</h3>
-                        <p>For a tailored product conversation, contact the 3PAP team with your organisation and priority use case.</p>
+                        <h3>{{ __('events.schedule.empty_title') }}</h3>
+                        <p>{{ __('events.schedule.empty_description') }}</p>
                     </div>
-                    <a class="pmis-events__text-link" href="https://3pap.africa">Visit 3pap.africa <span aria-hidden="true">&rarr;</span></a>
+                    <a class="pmis-events__text-link" href="https://3pap.africa">{{ __('events.schedule.visit') }} <span aria-hidden="true">&rarr;</span></a>
                 </div>
             </div>
         </section>
@@ -320,28 +317,20 @@
             <div class="pmis-events__wrap">
                 <div class="pmis-events__section-heading">
                     <div>
-                        <p class="pmis-events__section-kicker">What to expect</p>
-                        <h2 id="formats-title">Sessions designed around real delivery work</h2>
-                        <p>Each format connects platform capability to the governance, coordination and reporting questions institutions face every day.</p>
+                        <p class="pmis-events__section-kicker">{{ __('events.formats.kicker') }}</p>
+                        <h2 id="formats-title">{{ __('events.formats.title') }}</h2>
+                        <p>{{ __('events.formats.description') }}</p>
                     </div>
                 </div>
 
                 <div class="pmis-events__formats">
-                    <article class="pmis-events__format">
-                        <span class="pmis-events__format-number" aria-hidden="true">01 / DEMONSTRATE</span>
-                        <h3>Platform demonstrations</h3>
-                        <p>See how PMIS connects portfolios, programmes, projects, funds, procurement, people and performance in one operating environment.</p>
-                    </article>
-                    <article class="pmis-events__format">
-                        <span class="pmis-events__format-number" aria-hidden="true">02 / IMPLEMENT</span>
-                        <h3>Implementation briefings</h3>
-                        <p>Explore configurable governance, role-based workflows, integration considerations and a practical path from setup to adoption.</p>
-                    </article>
-                    <article class="pmis-events__format">
-                        <span class="pmis-events__format-number" aria-hidden="true">03 / EXCHANGE</span>
-                        <h3>Practitioner exchanges</h3>
-                        <p>Share approaches to portfolio oversight, financial governance, delivery assurance, evidence and executive decision support.</p>
-                    </article>
+                    @foreach (trans('events.formats.items') as $format)
+                        <article class="pmis-events__format">
+                            <span class="pmis-events__format-number" aria-hidden="true">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }} / {{ $format['label'] }}</span>
+                            <h3>{{ $format['title'] }}</h3>
+                            <p>{{ $format['description'] }}</p>
+                        </article>
+                    @endforeach
                 </div>
             </div>
         </section>
@@ -350,17 +339,15 @@
             <div class="pmis-events__wrap">
                 <div class="pmis-events__section-heading">
                     <div>
-                        <p class="pmis-events__section-kicker">Connected lifecycle</p>
-                        <h2 id="lifecycle-title">From strategic priority to verified outcome</h2>
-                        <p>Our event programme follows the complete delivery lifecycle so context, ownership and evidence remain connected at every stage.</p>
+                        <p class="pmis-events__section-kicker">{{ __('events.lifecycle.kicker') }}</p>
+                        <h2 id="lifecycle-title">{{ __('events.lifecycle.title') }}</h2>
+                        <p>{{ __('events.lifecycle.description') }}</p>
                     </div>
                 </div>
-                <div class="pmis-events__lifecycle" aria-label="PMIS delivery lifecycle">
-                    <div class="pmis-events__stage"><strong>Prioritise</strong><span>Align demand and investment to strategy.</span></div>
-                    <div class="pmis-events__stage"><strong>Plan</strong><span>Structure outcomes, resources and controls.</span></div>
-                    <div class="pmis-events__stage"><strong>Execute</strong><span>Coordinate work, partners and decisions.</span></div>
-                    <div class="pmis-events__stage"><strong>Assure</strong><span>Monitor performance, risk and evidence.</span></div>
-                    <div class="pmis-events__stage"><strong>Learn</strong><span>Evaluate results and improve investment.</span></div>
+                <div class="pmis-events__lifecycle" aria-label="{{ __('events.lifecycle.aria_label') }}">
+                    @foreach (trans('events.lifecycle.items') as $stage)
+                        <div class="pmis-events__stage"><strong>{{ $stage['title'] }}</strong><span>{{ $stage['description'] }}</span></div>
+                    @endforeach
                 </div>
             </div>
         </section>
@@ -369,12 +356,12 @@
             <div class="pmis-events__wrap">
                 <div class="pmis-events__cta">
                     <div>
-                        <p class="pmis-events__section-kicker">Start a conversation</p>
-                        <h2 id="event-contact-title">Need a session tailored to your institution?</h2>
-                        <p>Tell us about your delivery environment, the teams involved and the decisions PMIS needs to support.</p>
+                        <p class="pmis-events__section-kicker">{{ __('events.cta.kicker') }}</p>
+                        <h2 id="event-contact-title">{{ __('events.cta.title') }}</h2>
+                        <p>{{ __('events.cta.description') }}</p>
                     </div>
-                    <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.com?subject=Tailored%203PAP%20PMIS%20session">
-                        Contact the 3PAP team <span aria-hidden="true">&rarr;</span>
+                    <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.com?subject={{ rawurlencode(__('events.cta.mail_subject')) }}">
+                        {{ __('events.cta.contact') }} <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>
             </div>

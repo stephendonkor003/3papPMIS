@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cookie;
@@ -9,31 +11,21 @@ use Illuminate\Support\Facades\Cookie;
 class LanguageController extends Controller
 {
     /**
-     * Available locales for the application.
-     *
-     * @var array
-     */
-    protected $availableLocales = ['en', 'fr', 'ar', 'pt', 'es', 'sw'];
-
-    /**
      * Switch the application language.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $locale
-     * @return \Illuminate\Http\Response
      */
-    public function switch(Request $request, string $locale)
+    public function switch(Request $request, string $locale): JsonResponse|RedirectResponse
     {
         // Validate locale
-        if (!in_array($locale, $this->availableLocales)) {
+        if (! in_array($locale, $this->availableLocales(), true)) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invalid language code.',
+                    'message' => __('public.language.invalid'),
                 ], 400);
             }
 
-            return redirect()->back()->with('error', 'Invalid language code.');
+            return redirect()->to($this->safeReturnUrl($request))
+                ->with('error', __('public.language.invalid'));
         }
 
         // Set the application locale
@@ -50,31 +42,24 @@ class LanguageController extends Controller
             return response()->json([
                 'success' => true,
                 'locale' => $locale,
-                'message' => 'Language changed successfully.',
+                'message' => __('public.language.changed', [
+                    'language' => $this->getLanguageName($locale),
+                ]),
             ]);
         }
 
-        return redirect()->back()->with('success', 'Language changed to ' . $this->getLanguageName($locale) . '.');
+        return redirect()->to($this->safeReturnUrl($request, $locale))
+            ->with('success', __('public.language.changed', [
+                'language' => $this->getLanguageName($locale),
+            ]));
     }
 
     /**
      * Get the full language name from locale code.
-     *
-     * @param  string  $locale
-     * @return string
      */
     protected function getLanguageName(string $locale): string
     {
-        $languages = [
-            'en' => 'English',
-            'fr' => 'Français',
-            'ar' => 'العربية',
-            'pt' => 'Português',
-            'es' => 'Español',
-            'sw' => 'Kiswahili',
-        ];
-
-        return $languages[$locale] ?? $locale;
+        return (string) config("localization.supported.{$locale}.name", $locale);
     }
 
     protected function queuePreferredLocaleCookie(string $locale): void
@@ -93,11 +78,56 @@ class LanguageController extends Controller
     }
 
     /**
-     * Get the current locale.
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * Return only to the current application origin and keep an existing
+     * language query parameter synchronized with the newly selected locale.
      */
-    public function current()
+    protected function safeReturnUrl(Request $request, ?string $locale = null): string
+    {
+        $fallback = route('landing.index');
+        $referer = $request->headers->get('referer');
+
+        if (! is_string($referer) || $referer === '') {
+            return $fallback;
+        }
+
+        $parts = parse_url($referer);
+
+        if (! is_array($parts)
+            || ! isset($parts['scheme'], $parts['host'])
+            || strtolower($parts['scheme']) !== strtolower($request->getScheme())
+            || strtolower($parts['host']) !== strtolower($request->getHost())
+            || $this->normalizedPort($parts['scheme'], $parts['port'] ?? null) !== $request->getPort()) {
+            return $fallback;
+        }
+
+        $path = $parts['path'] ?? '/';
+
+        if (! str_starts_with($path, '/') || str_starts_with($path, '//')) {
+            return $fallback;
+        }
+
+        parse_str($parts['query'] ?? '', $query);
+
+        if ($locale === null) {
+            unset($query['lang']);
+        } else {
+            $query['lang'] = $locale;
+        }
+
+        $queryString = http_build_query($query);
+
+        return $path.($queryString === '' ? '' : '?'.$queryString);
+    }
+
+    protected function normalizedPort(string $scheme, ?int $port): int
+    {
+        return $port ?? (strtolower($scheme) === 'https' ? 443 : 80);
+    }
+
+    /**
+     * Get the current locale.
+     */
+    public function current(): JsonResponse
     {
         return response()->json([
             'locale' => App::getLocale(),
@@ -107,14 +137,12 @@ class LanguageController extends Controller
 
     /**
      * Get all available locales.
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function available()
+    public function available(): JsonResponse
     {
         $locales = [];
 
-        foreach ($this->availableLocales as $locale) {
+        foreach ($this->availableLocales() as $locale) {
             $locales[] = [
                 'code' => $locale,
                 'name' => $this->getLanguageName($locale),
@@ -124,5 +152,13 @@ class LanguageController extends Controller
         return response()->json([
             'locales' => $locales,
         ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function availableLocales(): array
+    {
+        return array_keys((array) config('localization.supported', []));
     }
 }

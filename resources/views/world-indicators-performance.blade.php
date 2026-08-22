@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+@php
+    $locale = app()->getLocale();
+    $direction = config("localization.supported.{$locale}.direction", 'ltr');
+@endphp
+<html lang="{{ $locale }}" dir="{{ $direction }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -126,95 +130,98 @@
         @media (max-width:560px){ .summary-grid,.controls,.controls.controls-6{grid-template-columns:1fr;} .controls .span-2,.controls .span-3,.controls .span-4{grid-column:span 1;} .snapshot-highlights,.series-cards{grid-template-columns:1fr;} }
     </style>
     <link rel="stylesheet" href="{{ asset('assets/css/3pap-public.css') }}">
+    @if($direction === 'rtl')
+        <link rel="stylesheet" href="{{ asset('assets/css/rtl.css') }}">
+    @endif
 </head>
-<body class="public-mobile-nav pmis-marketing-page" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<body class="public-mobile-nav pmis-marketing-page" dir="{{ $direction }}">
     @include('partials.public-marketing-header')
 
     <section class="hero-world" id="main-content" tabindex="-1">
         <h1>{{ $settings->page_title }}</h1>
-        <p>{{ $settings->page_intro ?: 'Explore country and regional indicators through map overlays, side-by-side charts, and detailed data sheets.' }}</p>
+        <p>{{ $settings->page_intro ?: __('world_indicators.hero.fallback_intro') }}</p>
         <div class="hero-meta">
             <div class="source-pills">
                 @forelse ($enabledSources as $source)
                     <span class="source-pill">{{ $source['label'] }}</span>
                 @empty
-                    <span class="source-pill">No source is enabled in back office settings</span>
+                    <span class="source-pill">{{ __('world_indicators.hero.no_sources') }}</span>
                 @endforelse
             </div>
             <div class="hero-links">
-                <a href="#geo-analytics">Geo Analytics</a>
-                <a href="#snapshot-lab">Country Snapshot</a>
-                <a href="#worldbank-compare">Comparison Studio</a>
+                <a href="#geo-analytics">{{ __('world_indicators.hero.geo_analytics') }}</a>
+                <a href="#snapshot-lab">{{ __('world_indicators.hero.country_snapshot') }}</a>
+                <a href="#worldbank-compare">{{ __('world_indicators.hero.comparison_studio') }}</a>
             </div>
         </div>
     </section>
 
     <section class="summary-grid">
-        <article class="summary-card"><div class="label">Regions Enabled</div><div class="value">{{ $summary['regions'] }}</div></article>
-        <article class="summary-card"><div class="label">Country Shapes</div><div class="value">{{ $summary['countries'] }}</div></article>
-        <article class="summary-card"><div class="label">Shapefiles Loaded</div><div class="value">{{ $summary['shape_files'] }}</div></article>
-        <article class="summary-card"><div class="label">Default Region</div><div class="value">{{ $regionLabels[$defaultRegion] ?? 'Auto' }}</div></article>
-        <article class="summary-card"><div class="label">WB Topics</div><div class="value">{{ $worldBankSummary['topics'] ?? 0 }}</div></article>
-        <article class="summary-card"><div class="label">WB Indicators</div><div class="value">{{ $worldBankSummary['indicators'] ?? 0 }}</div></article>
-        <article class="summary-card"><div class="label">WB Countries</div><div class="value">{{ $worldBankSummary['countries'] ?? 0 }}</div></article>
-        <article class="summary-card"><div class="label">Current Year</div><div class="value">{{ now()->year }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.regions') }}</div><div class="value">{{ $summary['regions'] }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.country_shapes') }}</div><div class="value">{{ $summary['countries'] }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.shapefiles') }}</div><div class="value">{{ $summary['shape_files'] }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.default_region') }}</div><div class="value">{{ $regionLabels[$defaultRegion] ?? __('world_indicators.common.auto') }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.wb_topics') }}</div><div class="value">{{ $worldBankSummary['topics'] ?? 0 }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.wb_indicators') }}</div><div class="value">{{ $worldBankSummary['indicators'] ?? 0 }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.wb_countries') }}</div><div class="value">{{ $worldBankSummary['countries'] ?? 0 }}</div></article>
+        <article class="summary-card"><div class="label">{{ __('world_indicators.summary.current_year') }}</div><div class="value">{{ now()->year }}</div></article>
     </section>
 
     <section class="viz-shell" id="geo-analytics">
         <article class="world-panel">
             <div class="world-panel-head">
-                <h3>Geo Intelligence Map</h3>
-                <p>Load regional shapefiles, paint countries by selected indicator values, and inspect ranked data sheets.</p>
+                <h3>{{ __('world_indicators.map.title') }}</h3>
+                <p>{{ __('world_indicators.map.description') }}</p>
             </div>
             <div class="controls controls-6">
-                <div><label for="regionSelect">Region</label><select id="regionSelect">@foreach ($enabledRegions as $region)<option value="{{ $region }}" @selected($defaultRegion === $region)>{{ $regionLabels[$region] ?? $region }}</option>@endforeach</select></div>
-                <div><label for="mapTopicSelect">Map Group</label><select id="mapTopicSelect"><option value="">Loading...</option></select></div>
-                <div><label for="mapIndicatorSelect">Map Indicator</label><select id="mapIndicatorSelect"><option value="">Select indicator</option></select></div>
-                <div><label for="mapYearInput">Map Year</label><input id="mapYearInput" type="number" min="1960" max="{{ now()->year }}" step="1"></div>
-                <div><label for="mapYearSlider">Year Slider</label><input id="mapYearSlider" type="range" min="1960" max="{{ now()->year }}" step="1"></div>
-                <div class="span-2"><label for="mapContinentsSelect">Geo Compare Continents (2+)</label><select id="mapContinentsSelect" multiple size="6"></select></div>
-                <div><label for="mapRangeMinSlider">Color Range Min %</label><input id="mapRangeMinSlider" type="range" min="0" max="100" step="1" value="0"></div>
-                <div><label for="mapRangeMaxSlider">Color Range Max %</label><input id="mapRangeMaxSlider" type="range" min="0" max="100" step="1" value="100"><div class="slider-readout" id="mapRangeLabel">Visible range: 0% - 100%</div></div>
-                <div><label for="runMapVizBtn">Map Overlay</label><button id="runMapVizBtn" class="btn-primary" type="button">Apply Indicator To Map</button></div>
-                <div><label for="runContinentCompareBtn">Continent Compare</label><button id="runContinentCompareBtn" class="btn-primary" type="button">Compare Selected Continents</button></div>
-                <div><label for="openMapCompareModalBtn">Geo Modal</label><button id="openMapCompareModalBtn" class="btn-secondary" type="button">Open Multi-Map Modal</button></div>
-                <div><label for="resetMapVizBtn">Map Reset</label><button id="resetMapVizBtn" class="btn-secondary" type="button">Clear Overlay</button></div>
+                <div><label for="regionSelect">{{ __('world_indicators.common.region') }}</label><select id="regionSelect">@foreach ($enabledRegions as $region)<option value="{{ $region }}" @selected($defaultRegion === $region)>{{ $regionLabels[$region] ?? $region }}</option>@endforeach</select></div>
+                <div><label for="mapTopicSelect">{{ __('world_indicators.map.group') }}</label><select id="mapTopicSelect"><option value="">{{ __('world_indicators.common.loading') }}</option></select></div>
+                <div><label for="mapIndicatorSelect">{{ __('world_indicators.map.indicator') }}</label><select id="mapIndicatorSelect"><option value="">{{ __('world_indicators.common.select_indicator') }}</option></select></div>
+                <div><label for="mapYearInput">{{ __('world_indicators.map.year') }}</label><input id="mapYearInput" type="number" min="1960" max="{{ now()->year }}" step="1"></div>
+                <div><label for="mapYearSlider">{{ __('world_indicators.map.year_slider') }}</label><input id="mapYearSlider" type="range" min="1960" max="{{ now()->year }}" step="1"></div>
+                <div class="span-2"><label for="mapContinentsSelect">{{ __('world_indicators.map.compare_continents') }}</label><select id="mapContinentsSelect" multiple size="6"></select></div>
+                <div><label for="mapRangeMinSlider">{{ __('world_indicators.map.color_min') }}</label><input id="mapRangeMinSlider" type="range" min="0" max="100" step="1" value="0"></div>
+                <div><label for="mapRangeMaxSlider">{{ __('world_indicators.map.color_max') }}</label><input id="mapRangeMaxSlider" type="range" min="0" max="100" step="1" value="100"><div class="slider-readout" id="mapRangeLabel">{{ __('world_indicators.map.visible_range', ['min' => 0, 'max' => 100]) }}</div></div>
+                <div><label for="runMapVizBtn">{{ __('world_indicators.map.overlay') }}</label><button id="runMapVizBtn" class="btn-primary" type="button">{{ __('world_indicators.map.apply') }}</button></div>
+                <div><label for="runContinentCompareBtn">{{ __('world_indicators.map.continent_compare') }}</label><button id="runContinentCompareBtn" class="btn-primary" type="button">{{ __('world_indicators.map.compare_selected') }}</button></div>
+                <div><label for="openMapCompareModalBtn">{{ __('world_indicators.map.geo_modal') }}</label><button id="openMapCompareModalBtn" class="btn-secondary" type="button">{{ __('world_indicators.map.open_multi_map') }}</button></div>
+                <div><label for="resetMapVizBtn">{{ __('world_indicators.map.reset') }}</label><button id="resetMapVizBtn" class="btn-secondary" type="button">{{ __('world_indicators.map.clear_overlay') }}</button></div>
             </div>
             <div id="worldMap"></div>
             <div class="map-meta">
                 <div class="legend">
-                    <div class="legend-title" id="mapLegendTitle">Map legend is empty until data is loaded.</div>
+                    <div class="legend-title" id="mapLegendTitle">{{ __('world_indicators.map.legend_empty') }}</div>
                     <div class="legend-scale"></div>
-                    <div class="legend-range" id="mapLegendRange"><span>No data</span><span>No data</span></div>
+                    <div class="legend-range" id="mapLegendRange"><span>{{ __('world_indicators.common.no_data') }}</span><span>{{ __('world_indicators.common.no_data') }}</span></div>
                 </div>
-                <div class="map-status" id="mapStatus">Preparing map and shapefiles...</div>
+                <div class="map-status" id="mapStatus">{{ __('world_indicators.map.preparing') }}</div>
             </div>
             <div class="data-grid">
-                <div class="data-card"><h4>Top Countries (Selected Year)</h4><div class="table-wrap"><table><thead><tr><th>#</th><th>Country</th><th>Value</th></tr></thead><tbody id="mapTopTableBody"><tr><td colspan="3">No map data loaded yet.</td></tr></tbody></table></div></div>
-                <div class="data-card"><h4>Regional Data Sheet</h4><div class="table-wrap"><table><thead><tr><th>Country</th><th>Code</th><th>Value</th></tr></thead><tbody id="mapDataTableBody"><tr><td colspan="3">No map data loaded yet.</td></tr></tbody></table></div></div>
+                <div class="data-card"><h4>{{ __('world_indicators.map.top_countries') }}</h4><div class="table-wrap"><table><thead><tr><th>#</th><th>{{ __('world_indicators.common.country') }}</th><th>{{ __('world_indicators.common.value') }}</th></tr></thead><tbody id="mapTopTableBody"><tr><td colspan="3">{{ __('world_indicators.map.no_map_data') }}</td></tr></tbody></table></div></div>
+                <div class="data-card"><h4>{{ __('world_indicators.map.regional_sheet') }}</h4><div class="table-wrap"><table><thead><tr><th>{{ __('world_indicators.common.country') }}</th><th>{{ __('world_indicators.common.code') }}</th><th>{{ __('world_indicators.common.value') }}</th></tr></thead><tbody id="mapDataTableBody"><tr><td colspan="3">{{ __('world_indicators.map.no_map_data') }}</td></tr></tbody></table></div></div>
             </div>
         </article>
 
         <aside class="world-panel" id="snapshot-lab">
             <div class="world-panel-head">
-                <h3>Country Indicator Snapshot Lab</h3>
-                <p>Click a shape or choose a country, then view source metrics, trend charts, and a structured sheet.</p>
+                <h3>{{ __('world_indicators.snapshot.title') }}</h3>
+                <p>{{ __('world_indicators.snapshot.description') }}</p>
             </div>
             <div class="controls">
-                <div><label for="countrySelect">Country</label><select id="countrySelect"><option value="">Select a country</option></select></div>
-                <div><label for="snapshotIndicatorSelect">Trend Indicator</label><select id="snapshotIndicatorSelect"><option value="">Select indicator</option></select></div>
-                <div><label for="snapshotYearFrom">Year From</label><input id="snapshotYearFrom" type="number" min="1960" step="1"></div>
-                <div><label for="snapshotYearTo">Year To</label><input id="snapshotYearTo" type="number" min="1960" step="1"></div>
-                <div><label for="runSnapshotBtn">Snapshot Trend</label><button id="runSnapshotBtn" class="btn-primary" type="button">Load Snapshot Trend</button></div>
-                <div><label for="openSnapshotModalBtn">Expand View</label><button id="openSnapshotModalBtn" class="btn-secondary" type="button">Open Snapshot Modal</button></div>
+                <div><label for="countrySelect">{{ __('world_indicators.common.country') }}</label><select id="countrySelect"><option value="">{{ __('world_indicators.common.select_country') }}</option></select></div>
+                <div><label for="snapshotIndicatorSelect">{{ __('world_indicators.snapshot.trend_indicator') }}</label><select id="snapshotIndicatorSelect"><option value="">{{ __('world_indicators.common.select_indicator') }}</option></select></div>
+                <div><label for="snapshotYearFrom">{{ __('world_indicators.common.year_from') }}</label><input id="snapshotYearFrom" type="number" min="1960" step="1"></div>
+                <div><label for="snapshotYearTo">{{ __('world_indicators.common.year_to') }}</label><input id="snapshotYearTo" type="number" min="1960" step="1"></div>
+                <div><label for="runSnapshotBtn">{{ __('world_indicators.snapshot.trend') }}</label><button id="runSnapshotBtn" class="btn-primary" type="button">{{ __('world_indicators.snapshot.load_trend') }}</button></div>
+                <div><label for="openSnapshotModalBtn">{{ __('world_indicators.common.expand_view') }}</label><button id="openSnapshotModalBtn" class="btn-secondary" type="button">{{ __('world_indicators.snapshot.open_modal') }}</button></div>
             </div>
             <div class="snapshot-content">
-                <h4 class="snapshot-country" id="snapshotCountry">No country selected</h4>
-                <p class="snapshot-hint" id="snapshotHint">Select a country from map or dropdown to load multi-source data.</p>
-                <div id="snapshotHighlights" class="snapshot-highlights"><div class="empty-box">No highlights yet.</div></div>
+                <h4 class="snapshot-country" id="snapshotCountry">{{ __('world_indicators.snapshot.no_country') }}</h4>
+                <p class="snapshot-hint" id="snapshotHint">{{ __('world_indicators.snapshot.select_hint') }}</p>
+                <div id="snapshotHighlights" class="snapshot-highlights"><div class="empty-box">{{ __('world_indicators.snapshot.no_highlights_yet') }}</div></div>
                 <div class="chart-wrap"><canvas id="snapshotChart"></canvas></div>
-                <div class="data-card" style="margin-bottom:0.65rem;"><div class="table-wrap"><table><thead><tr><th>Year</th><th style="text-align:right;">Value</th></tr></thead><tbody id="snapshotTableBody"><tr><td colspan="2">No trend loaded.</td></tr></tbody></table></div></div>
-                <div id="snapshotMetrics" class="source-grid"><div class="empty-box">Source metrics will appear here.</div></div>
+                <div class="data-card" style="margin-bottom:0.65rem;"><div class="table-wrap"><table><thead><tr><th>{{ __('world_indicators.common.year') }}</th><th style="text-align:right;">{{ __('world_indicators.common.value') }}</th></tr></thead><tbody id="snapshotTableBody"><tr><td colspan="2">{{ __('world_indicators.snapshot.no_trend') }}</td></tr></tbody></table></div></div>
+                <div id="snapshotMetrics" class="source-grid"><div class="empty-box">{{ __('world_indicators.snapshot.metrics_here') }}</div></div>
             </div>
         </aside>
     </section>
@@ -222,33 +229,33 @@
     <section class="compare-shell" id="worldbank-compare">
         <article class="world-panel">
             <div class="world-panel-head">
-                <h3>World Bank Comparison Studio</h3>
-                <p>Compare countries side by side by side, switch chart styles, inspect matrix views, and open large modal analytics.</p>
+                <h3>{{ __('world_indicators.compare.title') }}</h3>
+                <p>{{ __('world_indicators.compare.description') }}</p>
             </div>
             <div class="controls controls-6">
-                <div><label for="compareTopicSelect">Indicator Group</label><select id="compareTopicSelect"><option value="">Loading...</option></select></div>
-                <div class="span-2"><label for="compareIndicatorSelect">Indicator</label><select id="compareIndicatorSelect"><option value="">Select indicator</option></select></div>
-                <div><label for="compareModeSelect">Compare By</label><select id="compareModeSelect"><option value="country" selected>Country</option><option value="continent">Continent</option></select></div>
-                <div><label for="compareAggregationSelect">Aggregation</label><select id="compareAggregationSelect"><option value="avg" selected>Average</option><option value="sum">Sum</option></select></div>
-                <div><label for="compareChartTypeSelect">Chart Type</label><select id="compareChartTypeSelect"><option value="line" selected>Line</option><option value="bar">Bar</option></select></div>
-                <div><label for="compareYearFrom">Year From</label><input id="compareYearFrom" type="number" min="1960" step="1"></div>
-                <div><label for="compareYearTo">Year To</label><input id="compareYearTo" type="number" min="1960" step="1"></div>
-                <div><label for="compareRangeMinSlider">Heat Range Min %</label><input id="compareRangeMinSlider" type="range" min="0" max="100" step="1" value="0"></div>
-                <div><label for="compareRangeMaxSlider">Heat Range Max %</label><input id="compareRangeMaxSlider" type="range" min="0" max="100" step="1" value="100"><div class="slider-readout" id="compareRangeLabel">Color window: 0% - 100%</div></div>
-                <div class="span-3" id="compareCountriesWrap"><label for="compareCountriesSelect">Countries (2 or more)</label><select id="compareCountriesSelect" multiple size="7"></select></div>
-                <div class="span-3" id="compareContinentsWrap" style="display:none;"><label for="compareContinentsSelect">Continents (2 or more)</label><select id="compareContinentsSelect" multiple size="7"></select></div>
-                <div><label for="runCompareBtn">Compute</label><button id="runCompareBtn" class="btn-primary" type="button">Run Comparison</button></div>
-                <div><label for="openCompareModalBtn">Expand</label><button id="openCompareModalBtn" class="btn-secondary" type="button">Open Full Modal</button></div>
+                <div><label for="compareTopicSelect">{{ __('world_indicators.compare.indicator_group') }}</label><select id="compareTopicSelect"><option value="">{{ __('world_indicators.common.loading') }}</option></select></div>
+                <div class="span-2"><label for="compareIndicatorSelect">{{ __('world_indicators.common.indicator') }}</label><select id="compareIndicatorSelect"><option value="">{{ __('world_indicators.common.select_indicator') }}</option></select></div>
+                <div><label for="compareModeSelect">{{ __('world_indicators.compare.compare_by') }}</label><select id="compareModeSelect"><option value="country" selected>{{ __('world_indicators.common.country') }}</option><option value="continent">{{ __('world_indicators.common.continent') }}</option></select></div>
+                <div><label for="compareAggregationSelect">{{ __('world_indicators.compare.aggregation') }}</label><select id="compareAggregationSelect"><option value="avg" selected>{{ __('world_indicators.compare.average') }}</option><option value="sum">{{ __('world_indicators.compare.sum') }}</option></select></div>
+                <div><label for="compareChartTypeSelect">{{ __('world_indicators.compare.chart_type') }}</label><select id="compareChartTypeSelect"><option value="line" selected>{{ __('world_indicators.compare.line') }}</option><option value="bar">{{ __('world_indicators.compare.bar') }}</option></select></div>
+                <div><label for="compareYearFrom">{{ __('world_indicators.common.year_from') }}</label><input id="compareYearFrom" type="number" min="1960" step="1"></div>
+                <div><label for="compareYearTo">{{ __('world_indicators.common.year_to') }}</label><input id="compareYearTo" type="number" min="1960" step="1"></div>
+                <div><label for="compareRangeMinSlider">{{ __('world_indicators.compare.heat_min') }}</label><input id="compareRangeMinSlider" type="range" min="0" max="100" step="1" value="0"></div>
+                <div><label for="compareRangeMaxSlider">{{ __('world_indicators.compare.heat_max') }}</label><input id="compareRangeMaxSlider" type="range" min="0" max="100" step="1" value="100"><div class="slider-readout" id="compareRangeLabel">{{ __('world_indicators.compare.color_window', ['min' => 0, 'max' => 100]) }}</div></div>
+                <div class="span-3" id="compareCountriesWrap"><label for="compareCountriesSelect">{{ __('world_indicators.compare.countries') }}</label><select id="compareCountriesSelect" multiple size="7"></select></div>
+                <div class="span-3" id="compareContinentsWrap" style="display:none;"><label for="compareContinentsSelect">{{ __('world_indicators.compare.continents') }}</label><select id="compareContinentsSelect" multiple size="7"></select></div>
+                <div><label for="runCompareBtn">{{ __('world_indicators.compare.compute') }}</label><button id="runCompareBtn" class="btn-primary" type="button">{{ __('world_indicators.compare.run') }}</button></div>
+                <div><label for="openCompareModalBtn">{{ __('world_indicators.common.expand') }}</label><button id="openCompareModalBtn" class="btn-secondary" type="button">{{ __('world_indicators.compare.open_modal') }}</button></div>
             </div>
-            <div style="padding:0.7rem 1rem 0.75rem;"><div class="status" id="compareStatus">Load indicator and run comparison.</div></div>
+            <div style="padding:0.7rem 1rem 0.75rem;"><div class="status" id="compareStatus">{{ __('world_indicators.compare.initial_status') }}</div></div>
             <div class="compare-grid">
-                <div class="viz-card wide"><h4>Time-Series View</h4><div class="chart-wrap"><canvas id="compareChart"></canvas></div></div>
-                <div class="viz-card"><h4>Latest Year Side-By-Side</h4><div class="chart-wrap"><canvas id="compareLatestChart"></canvas></div></div>
-                <div class="viz-card"><h4>Series Cards</h4><div id="compareSeriesCards" class="series-cards"><div class="empty-box">Run a comparison to populate cards.</div></div></div>
+                <div class="viz-card wide"><h4>{{ __('world_indicators.compare.time_series') }}</h4><div class="chart-wrap"><canvas id="compareChart"></canvas></div></div>
+                <div class="viz-card"><h4>{{ __('world_indicators.compare.latest_year') }}</h4><div class="chart-wrap"><canvas id="compareLatestChart"></canvas></div></div>
+                <div class="viz-card"><h4>{{ __('world_indicators.compare.series_cards') }}</h4><div id="compareSeriesCards" class="series-cards"><div class="empty-box">{{ __('world_indicators.compare.run_for_cards') }}</div></div></div>
             </div>
             <div class="compare-grid">
-                <div class="viz-card"><h4>Comparison Data Sheet</h4><div class="table-wrap"><table><thead><tr id="compareTableHeadRow"><th>Year</th></tr></thead><tbody id="compareTableBody"><tr><td>No comparison loaded yet.</td></tr></tbody></table></div></div>
-                <div class="viz-card"><h4>Heat Matrix</h4><div id="compareHeatmap" class="heatmap-wrap"><table><tbody><tr><td style="padding:0.6rem;">Run a comparison to build the heat matrix.</td></tr></tbody></table></div></div>
+                <div class="viz-card"><h4>{{ __('world_indicators.compare.data_sheet') }}</h4><div class="table-wrap"><table><thead><tr id="compareTableHeadRow"><th>{{ __('world_indicators.common.year') }}</th></tr></thead><tbody id="compareTableBody"><tr><td>{{ __('world_indicators.compare.none_loaded') }}</td></tr></tbody></table></div></div>
+                <div class="viz-card"><h4>{{ __('world_indicators.compare.heat_matrix') }}</h4><div id="compareHeatmap" class="heatmap-wrap"><table><tbody><tr><td style="padding:0.6rem;">{{ __('world_indicators.compare.run_for_heatmap') }}</td></tr></tbody></table></div></div>
             </div>
         </article>
     </section>
@@ -260,23 +267,23 @@
 
     <div id="vizModal" class="viz-modal" aria-hidden="true">
         <div class="viz-modal-dialog">
-            <div class="viz-modal-head"><div><h4 id="vizModalTitle">Visualization</h4><p id="vizModalSubtitle">Detailed chart and data sheet</p></div><button class="viz-modal-close" id="vizModalCloseBtn" type="button" aria-label="Close modal">x</button></div>
-            <div class="viz-modal-body"><div class="chart-wrap"><canvas id="vizModalChart"></canvas></div><div class="data-card"><div class="table-wrap"><table><thead><tr id="vizModalTableHeadRow"><th>Year</th></tr></thead><tbody id="vizModalTableBody"><tr><td>No data available.</td></tr></tbody></table></div></div></div>
+            <div class="viz-modal-head"><div><h4 id="vizModalTitle">{{ __('world_indicators.modal.visualization') }}</h4><p id="vizModalSubtitle">{{ __('world_indicators.modal.details') }}</p></div><button class="viz-modal-close" id="vizModalCloseBtn" type="button" aria-label="{{ __('world_indicators.modal.close') }}">x</button></div>
+            <div class="viz-modal-body"><div class="chart-wrap"><canvas id="vizModalChart"></canvas></div><div class="data-card"><div class="table-wrap"><table><thead><tr id="vizModalTableHeadRow"><th>{{ __('world_indicators.common.year') }}</th></tr></thead><tbody id="vizModalTableBody"><tr><td>{{ __('world_indicators.common.no_data_available') }}</td></tr></tbody></table></div></div></div>
         </div>
     </div>
 
     <div id="mapCompareModal" class="viz-modal" aria-hidden="true">
         <div class="viz-modal-dialog map-compare-dialog">
-            <div class="viz-modal-head"><div><h4 id="mapCompareModalTitle">Multi-Continent Map Comparison</h4><p id="mapCompareModalSubtitle">Compare separate continent maps using slider-based color ranges.</p></div><button class="viz-modal-close" id="mapCompareModalCloseBtn" type="button" aria-label="Close geo modal">x</button></div>
+            <div class="viz-modal-head"><div><h4 id="mapCompareModalTitle">{{ __('world_indicators.modal.multi_continent') }}</h4><p id="mapCompareModalSubtitle">{{ __('world_indicators.modal.multi_description') }}</p></div><button class="viz-modal-close" id="mapCompareModalCloseBtn" type="button" aria-label="{{ __('world_indicators.modal.close_geo') }}">x</button></div>
             <div class="viz-modal-body">
-                <div id="mapComparePanels" class="continent-map-grid"><div class="empty-box">Run "Compare Selected Continents" to load Africa/Asia or any other continent side-by-side maps.</div></div>
+                <div id="mapComparePanels" class="continent-map-grid"><div class="empty-box">{{ __('world_indicators.modal.run_multi') }}</div></div>
                 <div class="data-card">
-                    <h4>Regional Data Sheet (Selected Year)</h4>
-                    <div class="table-wrap"><table><thead><tr><th>Country</th><th>Code</th><th>Value</th></tr></thead><tbody id="mapCompareCountryTableBody"><tr><td colspan="3">No map comparison loaded yet.</td></tr></tbody></table></div>
+                    <h4>{{ __('world_indicators.modal.regional_sheet') }}</h4>
+                    <div class="table-wrap"><table><thead><tr><th>{{ __('world_indicators.common.country') }}</th><th>{{ __('world_indicators.common.code') }}</th><th>{{ __('world_indicators.common.value') }}</th></tr></thead><tbody id="mapCompareCountryTableBody"><tr><td colspan="3">{{ __('world_indicators.modal.no_map_comparison') }}</td></tr></tbody></table></div>
                 </div>
                 <div class="data-card" style="margin-top:0.7rem;">
-                    <h4>Global Comparison (Selected Year)</h4>
-                    <div class="table-wrap"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody id="mapCompareGlobalTableBody"><tr><td colspan="2">No global comparison loaded yet.</td></tr></tbody></table></div>
+                    <h4>{{ __('world_indicators.modal.global_comparison') }}</h4>
+                    <div class="table-wrap"><table><thead><tr><th>{{ __('world_indicators.common.metric') }}</th><th>{{ __('world_indicators.common.value') }}</th></tr></thead><tbody id="mapCompareGlobalTableBody"><tr><td colspan="2">{{ __('world_indicators.modal.no_global_comparison') }}</td></tr></tbody></table></div>
                 </div>
             </div>
         </div>
@@ -285,8 +292,8 @@
     <div id="loadingModal" class="loading-modal" aria-hidden="true" aria-live="polite">
         <div class="loading-box">
             <div class="loading-spinner" aria-hidden="true"></div>
-            <h4 class="loading-title">Loading</h4>
-            <p class="loading-text" id="loadingModalMessage">Please wait while data is loading...</p>
+            <h4 class="loading-title">{{ __('world_indicators.common.loading_title') }}</h4>
+            <p class="loading-text" id="loadingModalMessage">{{ __('world_indicators.common.loading_wait') }}</p>
         </div>
     </div>
 
@@ -305,6 +312,15 @@
         const worldBankCountriesUrl = @json(route('world.indicators.countries'));
         const worldBankContinentsUrl = @json(route('world.indicators.continents'));
         const worldBankCompareUrl = @json(route('world.indicators.compare'));
+        const translations = {{ \Illuminate\Support\Js::from(__('world_indicators.js')) }};
+
+        function t(key, replacements = {}) {
+            let value = String(translations[key] ?? key);
+            Object.entries(replacements).forEach(([name, replacement]) => {
+                value = value.replaceAll(`:${name}`, String(replacement));
+            });
+            return value;
+        }
 
         const regionSelect = document.getElementById('regionSelect');
         const mapTopicSelect = document.getElementById('mapTopicSelect');
@@ -392,7 +408,7 @@
             mapValuesByNormName: new Map(),
             mapRows: [],
             mapRange: { min: null, max: null },
-            mapIndicatorMeta: { label: 'Indicator', unit: '' },
+            mapIndicatorMeta: { label: t('indicator'), unit: '' },
             mapVisibleRangePercent: { min: 0, max: 100 },
             selectedCountryIso2: null,
             selectedCountryName: null,
@@ -432,8 +448,8 @@
             return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
         }
         function escapeHtml(value) { const div = document.createElement('div'); div.textContent = String(value ?? ''); return div.innerHTML; }
-        function formatValue(value, decimals = 2) { return (value === null || value === undefined || Number.isNaN(Number(value))) ? 'N/A' : Number(value).toLocaleString(undefined, { maximumFractionDigits: decimals }); }
-        function formatCompact(value) { return (value === null || value === undefined || Number.isNaN(Number(value))) ? 'N/A' : Number(value).toLocaleString(undefined, { notation: 'compact', maximumFractionDigits: 2 }); }
+        function formatValue(value, decimals = 2) { return (value === null || value === undefined || Number.isNaN(Number(value))) ? t('not_available') : Number(value).toLocaleString(@json($locale), { maximumFractionDigits: decimals }); }
+        function formatCompact(value) { return (value === null || value === undefined || Number.isNaN(Number(value))) ? t('not_available') : Number(value).toLocaleString(@json($locale), { notation: 'compact', maximumFractionDigits: 2 }); }
         function getSelectedValues(selectEl) { return selectEl ? Array.from(selectEl.selectedOptions).map((option) => option.value).filter(Boolean) : []; }
         function setMapStatus(message, isError = false) { mapStatus.textContent = message; mapStatus.classList.toggle('error', Boolean(isError)); }
         function setCompareStatus(message, isError = false) { compareStatus.textContent = message; compareStatus.classList.toggle('error', Boolean(isError)); }
@@ -486,7 +502,7 @@
 
         function getComparisonRenderNote(slice) {
             if (!slice?.reduced) return '';
-            return `Large dataset detected (${slice.fullSeries} series x ${slice.fullYears} years). Showing ${slice.series.length} series and latest ${slice.years.length} years for stability.`;
+            return t('large_dataset', { series: slice.fullSeries, years: slice.fullYears, shown_series: slice.series.length, shown_years: slice.years.length });
         }
 
         function buildPayloadFromSlice(payload, slice) {
@@ -538,7 +554,7 @@
             return nonBlueScale[3];
         }
 
-        function showLoadingModal(message = 'Please wait while data is loading...') {
+        function showLoadingModal(message = t('loading_wait')) {
             state.loadingDepth += 1;
             loadingModalMessage.textContent = message;
             loadingModal.classList.add('open');
@@ -572,7 +588,7 @@
             unlockAllInteractiveControls();
             loadingModal.classList.remove('open');
             loadingModal.setAttribute('aria-hidden', 'true');
-            loadingModalMessage.textContent = 'Please wait while data is loading...';
+            loadingModalMessage.textContent = t('loading_wait');
         }
 
         function setMapInteractionLocked(locked) {
@@ -670,7 +686,7 @@
             const directName = props.NAME || props.name || props.COUNTRY || props.Country || props.ADMIN || props.NAME_EN || props.SOVEREIGNT;
             if (directName) return String(directName);
             const filename = decodeURIComponent((shapeFile.split('/').pop() || '').replace(/\.shp$/i, ''));
-            return filename || 'Unknown';
+            return filename || t('unknown');
         }
 
         function toFeatureCollection(raw) {
@@ -765,10 +781,10 @@
         function renderMapRangeLabel() {
             const visibleRange = getCurrentMapValueWindow();
             if (state.mapRange.min === null || state.mapRange.max === null || visibleRange.min === null || visibleRange.max === null) {
-                mapRangeLabel.textContent = `Visible range: ${state.mapVisibleRangePercent.min}% - ${state.mapVisibleRangePercent.max}%`;
+                mapRangeLabel.textContent = t('visible_range', { min: state.mapVisibleRangePercent.min, max: state.mapVisibleRangePercent.max });
                 return;
             }
-            mapRangeLabel.textContent = `Visible range: ${state.mapVisibleRangePercent.min}% - ${state.mapVisibleRangePercent.max}% (${formatCompact(visibleRange.min)} to ${formatCompact(visibleRange.max)})`;
+            mapRangeLabel.textContent = t('visible_range_values', { min: state.mapVisibleRangePercent.min, max: state.mapVisibleRangePercent.max, low: formatCompact(visibleRange.min), high: formatCompact(visibleRange.max) });
         }
 
         function refreshMapStyles() {
@@ -787,17 +803,17 @@
                     fillColor,
                     fillOpacity: value === null ? 0.2 : (inWindow ? 0.78 : 0.25),
                 });
-                const valueLabel = value === null ? 'No data' : formatValue(value);
-                const filtered = value !== null && !inWindow ? ' (outside slider range)' : '';
-                layer.bindTooltip(`${escapeHtml(layer.__countryName || 'Unknown')}<br><strong>${escapeHtml(valueLabel + filtered)}</strong>`, { direction: 'auto', sticky: true });
+                const valueLabel = value === null ? t('no_data') : formatValue(value);
+                const filtered = value !== null && !inWindow ? ` (${t('outside_slider')})` : '';
+                layer.bindTooltip(`${escapeHtml(layer.__countryName || t('unknown'))}<br><strong>${escapeHtml(valueLabel + filtered)}</strong>`, { direction: 'auto', sticky: true });
             });
         }
 
         function renderMapLegend(indicatorLabel, unit, min, max) {
             const visibleRange = getCurrentMapValueWindow();
-            if (min === null || max === null) { mapLegendTitle.textContent = `${indicatorLabel || 'Indicator'} - no mapped values`; mapLegendRange.innerHTML = '<span>No data</span><span>No data</span>'; return; }
-            mapLegendTitle.textContent = `${indicatorLabel || 'Indicator'} ${unit ? `(${unit})` : ''}`;
-            mapLegendRange.innerHTML = `<span>Global: ${escapeHtml(formatValue(min))} to ${escapeHtml(formatValue(max))}</span><span>Slider: ${escapeHtml(formatValue(visibleRange.min))} to ${escapeHtml(formatValue(visibleRange.max))}</span>`;
+            if (min === null || max === null) { mapLegendTitle.textContent = t('no_mapped_values', { indicator: indicatorLabel || t('indicator') }); mapLegendRange.innerHTML = `<span>${escapeHtml(t('no_data'))}</span><span>${escapeHtml(t('no_data'))}</span>`; return; }
+            mapLegendTitle.textContent = `${indicatorLabel || t('indicator')} ${unit ? `(${unit})` : ''}`;
+            mapLegendRange.innerHTML = `<span>${escapeHtml(t('global_range', { min: formatValue(min), max: formatValue(max) }))}</span><span>${escapeHtml(t('slider_range', { min: formatValue(visibleRange.min), max: formatValue(visibleRange.max) }))}</span>`;
         }
 
         function renderMapTables(rows) {
@@ -805,14 +821,14 @@
             const sortedRows = [...rows].sort((a, b) => { if (a.value === null) return 1; if (b.value === null) return -1; return b.value - a.value; });
             const visibleRows = sortedRows.filter((row) => valueIsInWindow(row.value, visibleRange.min, visibleRange.max));
             const topRows = visibleRows.slice(0, 12);
-            mapTopTableBody.innerHTML = topRows.length ? topRows.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.label)}</td><td>${escapeHtml(formatCompact(row.value))}</td></tr>`).join('') : '<tr><td colspan="3">No countries inside the selected slider range.</td></tr>';
+            mapTopTableBody.innerHTML = topRows.length ? topRows.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.label)}</td><td>${escapeHtml(formatCompact(row.value))}</td></tr>`).join('') : `<tr><td colspan="3">${escapeHtml(t('no_countries_in_range'))}</td></tr>`;
             mapDataTableBody.innerHTML = sortedRows.length ? sortedRows.map((row) => {
-                const suffix = row.value !== null && !valueIsInWindow(row.value, visibleRange.min, visibleRange.max) ? ' (filtered)' : '';
+                const suffix = row.value !== null && !valueIsInWindow(row.value, visibleRange.min, visibleRange.max) ? ` (${t('filtered')})` : '';
                 return `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(row.key || '-')}</td><td>${escapeHtml(formatValue(row.value))}${escapeHtml(suffix)}</td></tr>`;
-            }).join('') : '<tr><td colspan="3">No data for this year/indicator.</td></tr>';
+            }).join('') : `<tr><td colspan="3">${escapeHtml(t('no_data_year_indicator'))}</td></tr>`;
         }
 
-        function applyMapValuesFromPayload(payload, targetYear, sourceLabel = 'Map overlay') {
+        function applyMapValuesFromPayload(payload, targetYear, sourceLabel = t('map_overlay')) {
             const series = Array.isArray(payload?.series) ? payload.series : [];
             const byIso2 = new Map(); const byName = new Map(); const rows = [];
             series.forEach((item) => {
@@ -828,7 +844,7 @@
             state.mapValuesByNormName = byName;
             state.mapRows = rows;
             state.mapIndicatorMeta = {
-                label: payload?.indicator?.name || 'Indicator',
+                label: payload?.indicator?.name || t('indicator'),
                 unit: payload?.indicator?.unit || '',
             };
             state.mapRange = { min: values.length ? Math.min(...values) : null, max: values.length ? Math.max(...values) : null };
@@ -836,12 +852,12 @@
             refreshMapStyles();
             renderMapTables(rows);
             renderMapLegend(state.mapIndicatorMeta.label, state.mapIndicatorMeta.unit, state.mapRange.min, state.mapRange.max);
-            setMapStatus(`${sourceLabel}: mapped ${rows.length} countries for ${targetYear}. ${values.length} countries have values.`);
+            setMapStatus(t('mapped_countries', { source: sourceLabel, count: rows.length, year: targetYear, values: values.length }));
         }
 
         function applyRegionCountries(regions) {
             const mergedCountries = regions.flatMap((region) => countriesByRegion[region] || []);
-            countrySelect.innerHTML = '<option value="">Select a country</option>';
+            countrySelect.innerHTML = `<option value="">${escapeHtml(t('select_country'))}</option>`;
             Array.from(new Set(mergedCountries)).sort().forEach((countryName) => {
                 const option = document.createElement('option');
                 option.value = countryName;
@@ -867,13 +883,13 @@
             }) || null;
         }
 
-        async function loadRegions(regions, statusLabel = 'selected regions') {
+        async function loadRegions(regions, statusLabel = t('selected_regions')) {
             const uniqueRegions = Array.from(new Set((regions || []).filter((region) => String(region || '').trim() !== '')));
             clearMapLayers();
             applyRegionCountries(uniqueRegions);
-            setMapStatus(`Loading shapefiles for ${statusLabel}...`);
+            setMapStatus(t('loading_shapefiles', { region: statusLabel }));
             const shapeFiles = uniqueRegions.flatMap((region) => shapeFilesByRegion[region] || []);
-            if (!shapeFiles.length) { setMapStatus('No shapefiles found for selected region(s).', true); return; }
+            if (!shapeFiles.length) { setMapStatus(t('no_shapefiles'), true); return; }
             let loadedCount = 0; let failedCount = 0; let lastError = null;
             for (const shapeFile of shapeFiles) {
                 try {
@@ -899,14 +915,14 @@
                 }
             }
             if (!loadedCount) {
-                const reason = lastError && lastError.message ? ` Last error: ${lastError.message}` : '';
-                setMapStatus(`All shapefiles failed to load.${reason}`, true);
+                const reason = lastError && lastError.message ? t('last_error', { error: lastError.message }) : '';
+                setMapStatus(t('all_shapefiles_failed', { reason }), true);
                 return;
             }
             refreshMapStyles();
             const boundsLayer = L.featureGroup(state.activeLayers);
             if (boundsLayer.getBounds().isValid()) map.fitBounds(boundsLayer.getBounds(), { padding: [20, 20] });
-            setMapStatus(failedCount ? `Loaded ${loadedCount} shapefiles. ${failedCount} failed.` : `Loaded ${loadedCount} shapefiles successfully.`);
+            setMapStatus(failedCount ? t('shapefiles_partial', { loaded: loadedCount, failed: failedCount }) : t('shapefiles_loaded', { loaded: loadedCount }));
         }
 
         async function loadRegion(region) {
@@ -960,10 +976,10 @@
             const region = String(regionSelect.value || '').trim();
             const selectedContinents = getSelectedValues(mapContinentsSelect);
             const year = parseInt(mapYearInput.value || '', 10);
-            if (!indicatorId) { setMapStatus('Select a map indicator first.', true); return; }
-            if (!Number.isFinite(year)) { setMapStatus('Provide a valid map year.', true); return; }
+            if (!indicatorId) { setMapStatus(t('select_map_indicator'), true); return; }
+            if (!Number.isFinite(year)) { setMapStatus(t('valid_map_year'), true); return; }
             if (selectedContinents.length > PERF_LIMITS.maxMapCompareContinents) {
-                setMapStatus(`For stability, select up to ${PERF_LIMITS.maxMapCompareContinents} continents at once.`, true);
+                setMapStatus(t('continent_limit', { count: PERF_LIMITS.maxMapCompareContinents }), true);
                 return;
             }
             mapYearSlider.value = String(year);
@@ -971,21 +987,21 @@
             runContinentCompareBtn.disabled = true;
             openMapCompareModalBtn.disabled = true;
             const useGlobalLoading = options.showGlobalLoading !== false;
-            if (useGlobalLoading) showLoadingModal('Loading map indicator and refreshing map layers...');
+            if (useGlobalLoading) showLoadingModal(t('loading_map_indicator'));
             let countryCodes = [];
-            let sourceLabel = 'Geo Intelligence Map';
+            let sourceLabel = t('geo_map');
             try {
                 if (selectedContinents.length >= 2) {
                     const regionKeys = getRegionKeysForContinents(selectedContinents);
-                    if (regionKeys.length < 2) { setMapStatus('Selected continents are missing shapefile regions.', true); return; }
-                    await loadRegions(regionKeys, selectedContinents.join(' vs '));
+                    if (regionKeys.length < 2) { setMapStatus(t('continents_missing_shapes'), true); return; }
+                    await loadRegions(regionKeys, selectedContinents.join(` ${t('versus')} `));
                     countryCodes = getIso2CodesForContinents(selectedContinents);
-                    sourceLabel = `Geo Intelligence Map (${selectedContinents.join(' vs ')})`;
+                    sourceLabel = `${t('geo_map')} (${selectedContinents.join(` ${t('versus')} `)})`;
                 } else {
                     countryCodes = getIso2CodesForRegion(region);
                 }
-                if (countryCodes.length < 2) { setMapStatus('Not enough mapped countries for this map view.', true); return; }
-                setMapStatus('Loading map values from World Bank endpoint...');
+                if (countryCodes.length < 2) { setMapStatus(t('not_enough_mapped_countries'), true); return; }
+                setMapStatus(t('loading_map_values'));
                 const payload = await fetchComparisonPayload({ indicatorId, compareMode: 'country', countries: countryCodes, continents: [], yearFrom: year, yearTo: year, aggregation: 'avg' });
                 applyMapValuesFromPayload(payload, year, sourceLabel);
                 if (selectedContinents.length >= 2) {
@@ -1002,7 +1018,7 @@
                 }
             } catch (error) {
                 console.error('Map visualization failed', error);
-                setMapStatus('Could not load map values. Please try again.', true);
+                setMapStatus(t('map_values_failed'), true);
             } finally {
                 if (useGlobalLoading) hideLoadingModal();
                 runMapVizBtn.disabled = false;
@@ -1017,24 +1033,24 @@
             const year = Number.isFinite(Number(options.year)) ? Number(options.year) : parseInt(mapYearInput.value || '', 10);
             const continents = Array.isArray(options.continents) && options.continents.length ? options.continents : getSelectedValues(mapContinentsSelect);
             Array.from(mapContinentsSelect.options).forEach((option) => { option.selected = continents.includes(option.value); });
-            if (!indicatorId) { setMapStatus('Select a map indicator first.', true); return false; }
-            if (!Number.isFinite(year)) { setMapStatus('Provide a valid map year.', true); return false; }
-            if (continents.length < 2) { setMapStatus('Select at least two continents for Geo comparison.', true); return false; }
-            if (continents.length > PERF_LIMITS.maxMapCompareContinents) { setMapStatus(`For stability, select up to ${PERF_LIMITS.maxMapCompareContinents} continents at once.`, true); return false; }
+            if (!indicatorId) { setMapStatus(t('select_map_indicator'), true); return false; }
+            if (!Number.isFinite(year)) { setMapStatus(t('valid_map_year'), true); return false; }
+            if (continents.length < 2) { setMapStatus(t('select_two_continents_geo'), true); return false; }
+            if (continents.length > PERF_LIMITS.maxMapCompareContinents) { setMapStatus(t('continent_limit', { count: PERF_LIMITS.maxMapCompareContinents }), true); return false; }
             const regionKeys = getRegionKeysForContinents(continents);
-            if (regionKeys.length < 2) { setMapStatus('Selected continents are missing shapefile regions.', true); return false; }
+            if (regionKeys.length < 2) { setMapStatus(t('continents_missing_shapes'), true); return false; }
             const countryCodes = getIso2CodesForContinents(continents);
-            if (countryCodes.length < 2) { setMapStatus('No country mappings found for selected continents.', true); return false; }
+            if (countryCodes.length < 2) { setMapStatus(t('no_country_mappings'), true); return false; }
 
             mapYearInput.value = String(year);
             mapYearSlider.value = String(year);
             runMapVizBtn.disabled = true;
             runContinentCompareBtn.disabled = true;
             openMapCompareModalBtn.disabled = true;
-            showLoadingModal('Building multi-continent maps and fetching data...');
+            showLoadingModal(t('building_multi_maps'));
 
             try {
-                await loadRegions(regionKeys, continents.join(' vs '));
+                await loadRegions(regionKeys, continents.join(` ${t('versus')} `));
                 const payload = await fetchComparisonPayload({
                     indicatorId,
                     compareMode: 'country',
@@ -1044,7 +1060,7 @@
                     yearTo: year,
                     aggregation: 'avg',
                 });
-                applyMapValuesFromPayload(payload, year, `Geo Intelligence Map (${continents.join(' vs ')})`);
+                applyMapValuesFromPayload(payload, year, `${t('geo_map')} (${continents.join(` ${t('versus')} `)})`);
                 state.mapComparePayloadByContinent = new Map();
                 continents.forEach((continent) => {
                     state.mapComparePayloadByContinent.set(continent, buildContinentPayloadFromMapPayload(payload, continent));
@@ -1055,7 +1071,7 @@
                 return true;
             } catch (error) {
                 console.error('Continent comparison failed', error);
-                setMapStatus('Could not load multi-continent map comparison.', true);
+                setMapStatus(t('multi_map_failed'), true);
                 return false;
             } finally {
                 hideLoadingModal();
@@ -1068,16 +1084,16 @@
         function renderSnapshotSources(payload) {
             const sources = Array.isArray(payload?.sources) ? payload.sources : [];
             if (!sources.length) {
-                snapshotMetrics.innerHTML = '<div class="empty-box">No source data available for this country.</div>';
-                snapshotHighlights.innerHTML = '<div class="empty-box">No source highlights available.</div>';
+                snapshotMetrics.innerHTML = `<div class="empty-box">${escapeHtml(t('no_source_data'))}</div>`;
+                snapshotHighlights.innerHTML = `<div class="empty-box">${escapeHtml(t('no_source_highlights'))}</div>`;
                 return;
             }
             const highlights = [];
             sources.forEach((source) => (source.metrics || []).slice(0, 2).forEach((metric) => highlights.push({ label: metric.label, value: metric.value })));
-            snapshotHighlights.innerHTML = highlights.length ? highlights.slice(0, 6).map((item) => `<div class="highlight-card"><div class="k">${escapeHtml(item.label)}</div><div class="v">${escapeHtml(item.value)}</div></div>`).join('') : '<div class="empty-box">No highlights available.</div>';
+            snapshotHighlights.innerHTML = highlights.length ? highlights.slice(0, 6).map((item) => `<div class="highlight-card"><div class="k">${escapeHtml(item.label)}</div><div class="v">${escapeHtml(item.value)}</div></div>`).join('') : `<div class="empty-box">${escapeHtml(t('no_highlights'))}</div>`;
             snapshotMetrics.innerHTML = sources.map((source) => `
                 <div class="metric-source">
-                    <h5>${escapeHtml(source.label || 'Source')}</h5>
+                    <h5>${escapeHtml(source.label || t('source'))}</h5>
                     <p class="note">${escapeHtml(source.note || '')}</p>
                     <ul class="metric-list">${(source.metrics || []).map((metric) => `<li><span>${escapeHtml(metric.label)}</span><strong>${escapeHtml(metric.value)}</strong></li>`).join('')}</ul>
                 </div>
@@ -1126,32 +1142,32 @@
             const series = Array.isArray(payload?.series) ? payload.series : [];
             const targetSeries = series.find((item) => String(item.key || '').toUpperCase() === String(countryIso2 || '').toUpperCase()) || series[0];
             const points = Array.isArray(targetSeries?.points) ? targetSeries.points : [];
-            snapshotTableBody.innerHTML = points.length ? points.map((point) => `<tr><td>${escapeHtml(point.year)}</td><td style="text-align:right;">${escapeHtml(formatValue(point.value))}</td></tr>`).join('') : '<tr><td colspan="2">No trend points available.</td></tr>';
+            snapshotTableBody.innerHTML = points.length ? points.map((point) => `<tr><td>${escapeHtml(point.year)}</td><td style="text-align:right;">${escapeHtml(formatValue(point.value))}</td></tr>`).join('') : `<tr><td colspan="2">${escapeHtml(t('no_trend_points'))}</td></tr>`;
         }
 
         async function runSnapshotTrend() {
             if (state.loadingDepth > 0) return;
             const selectedCountryName = state.selectedCountryName || countrySelect.value;
-            if (!selectedCountryName) { snapshotHint.textContent = 'Select a country first.'; return; }
+            if (!selectedCountryName) { snapshotHint.textContent = t('select_country_first'); return; }
             const iso2 = state.selectedCountryIso2 || resolveIso2ByName(selectedCountryName);
-            if (!iso2) { snapshotHint.textContent = 'Could not map this country to a World Bank code.'; return; }
+            if (!iso2) { snapshotHint.textContent = t('country_code_failed'); return; }
             const indicatorId = String(snapshotIndicatorSelect.value || '').trim();
-            if (!indicatorId) { snapshotHint.textContent = 'Select a trend indicator for snapshot.'; return; }
+            if (!indicatorId) { snapshotHint.textContent = t('select_trend_indicator'); return; }
             const yearFrom = parseInt(snapshotYearFrom.value || '', 10);
             const yearTo = parseInt(snapshotYearTo.value || '', 10);
-            if (!Number.isFinite(yearFrom) || !Number.isFinite(yearTo)) { snapshotHint.textContent = 'Provide a valid snapshot year range.'; return; }
-            snapshotHint.textContent = 'Loading snapshot trend...';
+            if (!Number.isFinite(yearFrom) || !Number.isFinite(yearTo)) { snapshotHint.textContent = t('valid_snapshot_years'); return; }
+            snapshotHint.textContent = t('loading_snapshot_trend');
             runSnapshotBtn.disabled = true;
-            showLoadingModal('Loading country trend data...');
+            showLoadingModal(t('loading_country_trend'));
             try {
                 const payload = await fetchComparisonPayload({ indicatorId, compareMode: 'country', countries: [iso2], continents: [], yearFrom, yearTo, aggregation: 'avg' });
                 state.snapshotPayload = payload;
                 renderTrendChart(snapshotChartCanvas, 'snapshotChart', payload, 'line');
                 renderSnapshotTable(payload, iso2);
-                snapshotHint.textContent = `Snapshot loaded for ${selectedCountryName}: ${payload?.indicator?.name || indicatorId}.`;
+                snapshotHint.textContent = t('snapshot_loaded', { country: selectedCountryName, indicator: payload?.indicator?.name || indicatorId });
             } catch (error) {
                 console.error('Snapshot trend failed', error);
-                snapshotHint.textContent = 'Could not load snapshot trend. Please try again.';
+                snapshotHint.textContent = t('snapshot_failed');
             } finally {
                 hideLoadingModal();
                 runSnapshotBtn.disabled = false;
@@ -1165,7 +1181,7 @@
             state.selectedCountryName = countryName;
             state.selectedCountryIso2 = iso2 || null;
             snapshotCountry.textContent = countryName;
-            snapshotHint.textContent = 'Loading source metrics...';
+            snapshotHint.textContent = t('loading_source_metrics');
             refreshMapStyles();
 
             if (countrySelect.value !== countryName) {
@@ -1184,17 +1200,17 @@
                 if (targetOption) targetOption.selected = true;
             }
 
-            showLoadingModal('Loading country profile metrics...');
+            showLoadingModal(t('loading_profile_metrics'));
             try {
                 const response = await fetch(`${countryMetricsUrl}?country=${encodeURIComponent(countryName)}`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const payload = await response.json();
                 renderSnapshotSources(payload);
-                snapshotHint.textContent = 'Source metrics loaded. Running trend visualization...';
+                snapshotHint.textContent = t('source_metrics_loaded');
             } catch (error) {
                 console.error('Country metrics load failed', error);
-                snapshotMetrics.innerHTML = '<div class="empty-box">Could not load country metrics. Please retry.</div>';
-                snapshotHint.textContent = 'Could not load source metrics for this country.';
+                snapshotMetrics.innerHTML = `<div class="empty-box">${escapeHtml(t('country_metrics_failed'))}</div>`;
+                snapshotHint.textContent = t('source_metrics_failed');
             } finally {
                 hideLoadingModal();
             }
@@ -1208,7 +1224,7 @@
                 const targetPoint = points.find((point) => Number(point?.year) === Number(year)) || null;
                 return {
                     key: String(item?.key || '').toUpperCase(),
-                    label: String(item?.label || item?.key || 'Unknown'),
+                    label: String(item?.label || item?.key || t('unknown')),
                     value: targetPoint && targetPoint.value !== undefined && targetPoint.value !== null ? Number(targetPoint.value) : null,
                 };
             });
@@ -1225,15 +1241,15 @@
 
         function renderCompareRangeLabel(payload = state.comparePayload) {
             if (!payload) {
-                compareRangeLabel.textContent = `Color window: ${state.compareVisibleRangePercent.min}% - ${state.compareVisibleRangePercent.max}%`;
+                compareRangeLabel.textContent = t('color_window', { min: state.compareVisibleRangePercent.min, max: state.compareVisibleRangePercent.max });
                 return;
             }
             const range = getCompareValueWindow(payload);
             if (range.min === null || range.max === null || range.visibleMin === null || range.visibleMax === null) {
-                compareRangeLabel.textContent = `Color window: ${state.compareVisibleRangePercent.min}% - ${state.compareVisibleRangePercent.max}%`;
+                compareRangeLabel.textContent = t('color_window', { min: state.compareVisibleRangePercent.min, max: state.compareVisibleRangePercent.max });
                 return;
             }
-            compareRangeLabel.textContent = `Color window: ${state.compareVisibleRangePercent.min}% - ${state.compareVisibleRangePercent.max}% (${formatCompact(range.visibleMin)} to ${formatCompact(range.visibleMax)})`;
+            compareRangeLabel.textContent = t('color_window_values', { min: state.compareVisibleRangePercent.min, max: state.compareVisibleRangePercent.max, low: formatCompact(range.visibleMin), high: formatCompact(range.visibleMax) });
         }
 
         function destroyMapCompareModalMaps() {
@@ -1294,7 +1310,7 @@
                             const countryName = getCountryName(feature, shapeFile);
                             const iso2 = resolveIso2FromFeature(feature, countryName);
                             const value = iso2 && valueByIso2.has(iso2) ? valueByIso2.get(iso2) : valueByName.get(normalizeCountryName(countryName));
-                            const valueLabel = value === null || value === undefined ? 'No data' : formatValue(value);
+                            const valueLabel = value === null || value === undefined ? t('no_data') : formatValue(value);
                             layerRef.bindTooltip(`${escapeHtml(countryName)}<br><strong>${escapeHtml(valueLabel)}</strong>`, { sticky: true });
                         },
                     }).addTo(continentMap);
@@ -1306,7 +1322,7 @@
 
             if (!layers.length) {
                 continentMap.remove();
-                mapContainer.innerHTML = '<div class="empty-box" style="margin:0.6rem;">No map shapes available for this continent.</div>';
+                mapContainer.innerHTML = `<div class="empty-box" style="margin:0.6rem;">${escapeHtml(t('no_continent_shapes'))}</div>`;
                 return;
             }
 
@@ -1322,11 +1338,11 @@
             destroyMapCompareModalMaps();
             const context = state.mapCompareContext;
             if (!context || !Array.isArray(context.continents) || !context.continents.length) {
-                mapCompareModalTitle.textContent = 'Multi-Continent Map Comparison';
-                mapCompareModalSubtitle.textContent = 'Compare separate continent maps using slider-based color ranges.';
-                mapComparePanels.innerHTML = '<div class="empty-box">Run "Compare Selected Continents" to load multi-continent maps.</div>';
-                mapCompareCountryTableBody.innerHTML = '<tr><td colspan="3">No map comparison loaded yet.</td></tr>';
-                mapCompareGlobalTableBody.innerHTML = '<tr><td colspan="2">No global comparison loaded yet.</td></tr>';
+                mapCompareModalTitle.textContent = t('multi_continent_title');
+                mapCompareModalSubtitle.textContent = t('multi_continent_description');
+                mapComparePanels.innerHTML = `<div class="empty-box">${escapeHtml(t('run_multi_continent'))}</div>`;
+                mapCompareCountryTableBody.innerHTML = `<tr><td colspan="3">${escapeHtml(t('no_map_comparison'))}</td></tr>`;
+                mapCompareGlobalTableBody.innerHTML = `<tr><td colspan="2">${escapeHtml(t('no_global_comparison'))}</td></tr>`;
                 return;
             }
 
@@ -1339,18 +1355,18 @@
             const globalMax = finiteValues.length ? Math.max(...finiteValues) : null;
             const mapWindow = getCurrentMapValueWindow();
 
-            mapCompareModalTitle.textContent = `${context.indicatorName || 'Indicator'} - Continent Maps`;
-            mapCompareModalSubtitle.textContent = `${context.continents.join(' vs ')} | Year ${context.year}${context.indicatorUnit ? ` | Unit: ${context.indicatorUnit}` : ''}`;
+            mapCompareModalTitle.textContent = t('continent_maps_title', { indicator: context.indicatorName || t('indicator') });
+            mapCompareModalSubtitle.textContent = t('continent_maps_subtitle', { continents: context.continents.join(` ${t('versus')} `), year: context.year, unit: context.indicatorUnit ? t('unit_suffix', { unit: context.indicatorUnit }) : '' });
 
             mapComparePanels.innerHTML = context.continents.map((continent, index) => `
                 <article class="continent-map-card">
-                    <div class="continent-map-head"><h5>${escapeHtml(continent)}</h5><span>Year ${escapeHtml(context.year)}</span></div>
+                    <div class="continent-map-head"><h5>${escapeHtml(continent)}</h5><span>${escapeHtml(t('year_value', { year: context.year }))}</span></div>
                     <div id="continentMiniMap_${index}" class="continent-map"></div>
                     <div class="continent-map-meta">
                         <div class="continent-map-scale"></div>
-                        <div class="continent-map-range"><span>Global: ${escapeHtml(formatValue(globalMin))} to ${escapeHtml(formatValue(globalMax))}</span><span>Slider: ${escapeHtml(formatValue(mapWindow.min))} to ${escapeHtml(formatValue(mapWindow.max))}</span></div>
+                        <div class="continent-map-range"><span>${escapeHtml(t('global_range', { min: formatValue(globalMin), max: formatValue(globalMax) }))}</span><span>${escapeHtml(t('slider_range', { min: formatValue(mapWindow.min), max: formatValue(mapWindow.max) }))}</span></div>
                     </div>
-                    <div class="table-wrap continent-mini-table"><table><thead><tr><th>Country</th><th>Value</th></tr></thead><tbody id="continentMiniRows_${index}"><tr><td colspan="2">Loading...</td></tr></tbody></table></div>
+                    <div class="table-wrap continent-mini-table"><table><thead><tr><th>${escapeHtml(t('country'))}</th><th>${escapeHtml(t('value'))}</th></tr></thead><tbody id="continentMiniRows_${index}"><tr><td colspan="2">${escapeHtml(t('loading'))}</td></tr></tbody></table></div>
                 </article>
             `).join('');
 
@@ -1361,10 +1377,10 @@
             });
             const truncatedRows = sortedRows.slice(0, PERF_LIMITS.maxMapCompareTableRows);
             const truncated = sortedRows.length > truncatedRows.length;
-            const truncateNote = truncated ? `<tr><td colspan="3" style="background:#EFF8FF;color:#0A2450;font-weight:700;">Large result set detected. Showing first ${truncatedRows.length} rows out of ${sortedRows.length}.</td></tr>` : '';
+            const truncateNote = truncated ? `<tr><td colspan="3" style="background:#EFF8FF;color:#0A2450;font-weight:700;">${escapeHtml(t('large_result_set', { shown: truncatedRows.length, total: sortedRows.length }))}</td></tr>` : '';
             mapCompareCountryTableBody.innerHTML = truncatedRows.length
                 ? `${truncateNote}${truncatedRows.map((row) => `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(row.key || '-')}</td><td>${escapeHtml(formatValue(row.value))}</td></tr>`).join('')}`
-                : '<tr><td colspan="3">No data loaded for selected continents.</td></tr>';
+                : `<tr><td colspan="3">${escapeHtml(t('no_selected_continent_data'))}</td></tr>`;
 
             const validRows = allRows.filter((row) => row.value !== null && Number.isFinite(Number(row.value)));
             const sum = validRows.reduce((acc, row) => acc + Number(row.value), 0);
@@ -1384,29 +1400,29 @@
             const bestContinent = rankedContinentStats[0] || null;
             const worstContinent = rankedContinentStats[rankedContinentStats.length - 1] || null;
             mapCompareGlobalTableBody.innerHTML = `
-                <tr><td>Compared Continents</td><td>${escapeHtml(context.continents.join(', '))}</td></tr>
-                <tr><td>Selected Year</td><td>${escapeHtml(context.year)}</td></tr>
-                <tr><td>Countries In Sheet</td><td>${escapeHtml(allRows.length)}</td></tr>
-                <tr><td>Countries With Values</td><td>${escapeHtml(validRows.length)}</td></tr>
-                <tr><td>Global Min</td><td>${escapeHtml(formatValue(globalMin))}</td></tr>
-                <tr><td>Global Max</td><td>${escapeHtml(formatValue(globalMax))}</td></tr>
-                <tr><td>Global Average</td><td>${escapeHtml(formatValue(avg))}</td></tr>
-                <tr><td>Top Country</td><td>${escapeHtml(topRow ? `${topRow.label} (${topRow.continent}) - ${formatValue(topRow.value)}` : 'N/A')}</td></tr>
-                <tr><td>Lowest Country</td><td>${escapeHtml(bottomRow ? `${bottomRow.label} (${bottomRow.continent}) - ${formatValue(bottomRow.value)}` : 'N/A')}</td></tr>
-                <tr><td>Best Continent (Avg)</td><td>${escapeHtml(bestContinent ? `${bestContinent.continent} - ${formatValue(bestContinent.avg)}` : 'N/A')}</td></tr>
-                <tr><td>Lowest Continent (Avg)</td><td>${escapeHtml(worstContinent ? `${worstContinent.continent} - ${formatValue(worstContinent.avg)}` : 'N/A')}</td></tr>
-                <tr><td>Slider Window</td><td>${escapeHtml(`${formatValue(mapWindow.min)} to ${formatValue(mapWindow.max)}`)}</td></tr>
+                <tr><td>${escapeHtml(t('compared_continents'))}</td><td>${escapeHtml(context.continents.join(', '))}</td></tr>
+                <tr><td>${escapeHtml(t('selected_year'))}</td><td>${escapeHtml(context.year)}</td></tr>
+                <tr><td>${escapeHtml(t('countries_in_sheet'))}</td><td>${escapeHtml(allRows.length)}</td></tr>
+                <tr><td>${escapeHtml(t('countries_with_values'))}</td><td>${escapeHtml(validRows.length)}</td></tr>
+                <tr><td>${escapeHtml(t('global_min'))}</td><td>${escapeHtml(formatValue(globalMin))}</td></tr>
+                <tr><td>${escapeHtml(t('global_max'))}</td><td>${escapeHtml(formatValue(globalMax))}</td></tr>
+                <tr><td>${escapeHtml(t('global_average'))}</td><td>${escapeHtml(formatValue(avg))}</td></tr>
+                <tr><td>${escapeHtml(t('top_country'))}</td><td>${escapeHtml(topRow ? `${topRow.label} (${topRow.continent}) - ${formatValue(topRow.value)}` : t('not_available'))}</td></tr>
+                <tr><td>${escapeHtml(t('lowest_country'))}</td><td>${escapeHtml(bottomRow ? `${bottomRow.label} (${bottomRow.continent}) - ${formatValue(bottomRow.value)}` : t('not_available'))}</td></tr>
+                <tr><td>${escapeHtml(t('best_continent'))}</td><td>${escapeHtml(bestContinent ? `${bestContinent.continent} - ${formatValue(bestContinent.avg)}` : t('not_available'))}</td></tr>
+                <tr><td>${escapeHtml(t('lowest_continent'))}</td><td>${escapeHtml(worstContinent ? `${worstContinent.continent} - ${formatValue(worstContinent.avg)}` : t('not_available'))}</td></tr>
+                <tr><td>${escapeHtml(t('slider_window'))}</td><td>${escapeHtml(t('range_values', { min: formatValue(mapWindow.min), max: formatValue(mapWindow.max) }))}</td></tr>
             `;
 
             const drawJobs = context.continents.map(async (continent, index) => {
                 const payload = state.mapComparePayloadByContinent.get(continent);
                 const rows = getSeriesRowsForYear(payload, context.year).filter((row) => row.value !== null && Number.isFinite(Number(row.value))).sort((a, b) => b.value - a.value);
                 const miniRowsBody = document.getElementById(`continentMiniRows_${index}`);
-                miniRowsBody.innerHTML = rows.length ? rows.slice(0, 12).map((row) => `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(formatCompact(row.value))}</td></tr>`).join('') : '<tr><td colspan="2">No values for this year.</td></tr>';
+                miniRowsBody.innerHTML = rows.length ? rows.slice(0, 12).map((row) => `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(formatCompact(row.value))}</td></tr>`).join('') : `<tr><td colspan="2">${escapeHtml(t('no_values_year'))}</td></tr>`;
                 const regionKey = getRegionKeyForContinent(continent);
                 if (!regionKey) {
                     const mapContainer = document.getElementById(`continentMiniMap_${index}`);
-                    if (mapContainer) mapContainer.innerHTML = '<div class="empty-box" style="margin:0.6rem;">No matching region shapefile.</div>';
+                    if (mapContainer) mapContainer.innerHTML = `<div class="empty-box" style="margin:0.6rem;">${escapeHtml(t('no_matching_shapefile'))}</div>`;
                     return;
                 }
                 await drawContinentMiniMap(`continentMiniMap_${index}`, regionKey, rows, globalMin, globalMax, mapWindow.min, mapWindow.max);
@@ -1459,7 +1475,7 @@
                 state.mapCompareRenderTimer = null;
                 if (token !== state.mapCompareRenderToken) return;
                 if (state.loadingDepth > 0) return;
-                showLoadingModal('Refreshing map comparison view...');
+                showLoadingModal(t('refreshing_map_comparison'));
                 try {
                     await renderMapCompareModalContent();
                 } catch (error) {
@@ -1482,14 +1498,14 @@
             const slice = getSafeComparisonSlice(payload);
             const years = slice.years;
             const series = slice.series;
-            compareTableHeadRow.innerHTML = '<th>Year</th>';
+            compareTableHeadRow.innerHTML = `<th>${escapeHtml(t('year'))}</th>`;
             series.forEach((item) => {
                 const th = document.createElement('th');
                 th.textContent = item.label;
                 compareTableHeadRow.appendChild(th);
             });
             if (!(years.length && series.length)) {
-                compareTableBody.innerHTML = '<tr><td>No comparison data available.</td></tr>';
+                compareTableBody.innerHTML = `<tr><td>${escapeHtml(t('no_comparison_data'))}</td></tr>`;
                 return;
             }
             const note = getComparisonRenderNote(slice);
@@ -1526,7 +1542,7 @@
                 data: {
                     labels: rowsForChart.map((row) => row.label),
                     datasets: [{
-                        label: 'Latest',
+                        label: t('latest'),
                         data: rowsForChart.map((row) => row.latest),
                         backgroundColor: rowsForChart.map((row) => getChoroplethColor(row.latest, valueWindow.min, valueWindow.max, valueWindow.visibleMin, valueWindow.visibleMax)),
                     }],
@@ -1540,13 +1556,13 @@
             const valueWindow = getCompareValueWindow(payload);
             compareSeriesCards.innerHTML = latestRows.length ? latestRows.map((row) => {
                 const change = row.latest !== null && row.first !== null ? row.latest - row.first : null;
-                const changeLabel = change === null ? 'Change: N/A' : `Change: ${formatCompact(change)}`;
+                const changeLabel = t('change_value', { value: change === null ? t('not_available') : formatCompact(change) });
                 const inWindow = valueIsInWindow(row.latest, valueWindow.visibleMin, valueWindow.visibleMax);
                 const tone = row.latest === null ? '#cbd5e1' : getChoroplethColor(row.latest, valueWindow.min, valueWindow.max, valueWindow.visibleMin, valueWindow.visibleMax);
                 const bg = row.latest === null ? '#f8fbff' : `${tone}2E`;
-                const hint = row.latest !== null && !inWindow ? 'Outside slider range' : 'Inside slider range';
+                const hint = row.latest !== null && !inWindow ? t('outside_slider') : t('inside_slider');
                 return `<div class="series-card" style="background:${escapeHtml(bg)}; border-color:${escapeHtml(tone)};"><div class="name">${escapeHtml(row.label)}</div><div class="latest">${escapeHtml(formatCompact(row.latest))}</div><div class="change">${escapeHtml(changeLabel)}</div><div class="change">${escapeHtml(hint)}</div></div>`;
-            }).join('') : '<div class="empty-box">No series available.</div>';
+            }).join('') : `<div class="empty-box">${escapeHtml(t('no_series'))}</div>`;
         }
 
         function renderCompareHeatmap(payload) {
@@ -1554,7 +1570,7 @@
             const years = slice.years;
             const series = slice.series;
             if (!years.length || !series.length) {
-                compareHeatmap.innerHTML = '<table><tbody><tr><td style="padding:0.6rem;">No data available.</td></tr></tbody></table>';
+                compareHeatmap.innerHTML = `<table><tbody><tr><td style="padding:0.6rem;">${escapeHtml(t('no_data_available'))}</td></tr></tbody></table>`;
                 return;
             }
             const valueWindow = getCompareValueWindow(payload);
@@ -1569,7 +1585,7 @@
             const note = getComparisonRenderNote(slice);
             compareHeatmap.innerHTML = `
                 <table>
-                    <thead><tr><th>Series</th>${years.map((year) => `<th>${escapeHtml(year)}</th>`).join('')}</tr></thead>
+                    <thead><tr><th>${escapeHtml(t('series'))}</th>${years.map((year) => `<th>${escapeHtml(year)}</th>`).join('')}</tr></thead>
                     <tbody>
                         ${note ? `<tr><td colspan="${years.length + 1}" style="background:#EFF8FF;color:#0A2450;font-weight:700;">${escapeHtml(note)}</td></tr>` : ''}
                         ${series.map((item) => `<tr><td>${escapeHtml(item.label)}</td>${years.map((year) => {
@@ -1601,36 +1617,36 @@
             const countries = getSelectedValues(compareCountriesSelect);
             const continents = getSelectedValues(compareContinentsSelect);
             const aggregation = String(compareAggregationSelect.value || 'avg');
-            if (!indicatorId) { setCompareStatus('Select a comparison indicator first.', true); return; }
-            if (!Number.isFinite(yearFrom) || !Number.isFinite(yearTo)) { setCompareStatus('Provide a valid comparison year range.', true); return; }
-            if (mode === 'country' && countries.length < 2) { setCompareStatus('Select at least two countries for side-by-side comparison.', true); return; }
-            if (mode === 'continent' && continents.length < 2) { setCompareStatus('Select at least two continents.', true); return; }
+            if (!indicatorId) { setCompareStatus(t('select_comparison_indicator'), true); return; }
+            if (!Number.isFinite(yearFrom) || !Number.isFinite(yearTo)) { setCompareStatus(t('valid_comparison_years'), true); return; }
+            if (mode === 'country' && countries.length < 2) { setCompareStatus(t('select_two_countries'), true); return; }
+            if (mode === 'continent' && continents.length < 2) { setCompareStatus(t('select_two_continents'), true); return; }
             const requestedYears = Math.abs(yearTo - yearFrom) + 1;
             if (mode === 'country' && countries.length > PERF_LIMITS.maxCountrySeriesRequest) {
-                setCompareStatus(`Too many countries selected (${countries.length}). Use ${PERF_LIMITS.maxCountrySeriesRequest} or fewer to avoid browser crashes.`, true);
+                setCompareStatus(t('too_many_countries', { selected: countries.length, max: PERF_LIMITS.maxCountrySeriesRequest }), true);
                 return;
             }
             if (mode === 'country' && (countries.length * requestedYears) > PERF_LIMITS.maxCountryCellsRequest) {
-                setCompareStatus(`Selection is too large (${countries.length} countries x ${requestedYears} years). Reduce countries or years to continue safely.`, true);
+                setCompareStatus(t('selection_too_large', { countries: countries.length, years: requestedYears }), true);
                 return;
             }
-            setCompareStatus('Running comparison and refreshing cache for selected window...');
+            setCompareStatus(t('running_comparison'));
             runCompareBtn.disabled = true;
-            showLoadingModal('Running comparison and preparing visualizations...');
+            showLoadingModal(t('preparing_visualizations'));
             try {
                 const payload = await fetchComparisonPayload({ indicatorId, compareMode: mode, countries, continents, yearFrom, yearTo, aggregation });
                 state.comparePayload = payload;
                 renderComparisonVisuals(payload);
                 const slice = getSafeComparisonSlice(payload);
                 const reductionNote = getComparisonRenderNote(slice);
-                setCompareStatus(`Loaded ${(payload?.series || []).length} series for ${payload?.indicator?.name || indicatorId}.${reductionNote ? ` ${reductionNote}` : ''}`);
+                setCompareStatus(t('series_loaded', { count: (payload?.series || []).length, indicator: payload?.indicator?.name || indicatorId, note: reductionNote ? ` ${reductionNote}` : '' }));
                 if (mode === 'country') {
                     mapYearInput.value = String(yearTo);
                     mapYearSlider.value = String(yearTo);
                     if (Array.from(mapIndicatorSelect.options).some((option) => option.value === indicatorId)) {
                         mapIndicatorSelect.value = indicatorId;
                     }
-                    applyMapValuesFromPayload(payload, yearTo, 'Comparison Studio overlay');
+                    applyMapValuesFromPayload(payload, yearTo, t('comparison_overlay'));
                 } else if (mode === 'continent') {
                     mapYearInput.value = String(yearTo);
                     mapYearSlider.value = String(yearTo);
@@ -1644,7 +1660,7 @@
                 }
             } catch (error) {
                 console.error('Comparison failed', error);
-                setCompareStatus('Could not complete comparison. Please try again.', true);
+                setCompareStatus(t('comparison_failed'), true);
             } finally {
                 hideLoadingModal();
                 runCompareBtn.disabled = false;
@@ -1664,10 +1680,10 @@
             renderTrendChart(vizModalChartCanvas, 'modalChart', modalPayload, compareChartTypeSelect.value || 'line');
             const years = Array.isArray(modalPayload?.years) ? modalPayload.years : [];
             const series = Array.isArray(modalPayload?.series) ? modalPayload.series : [];
-            vizModalTableHeadRow.innerHTML = '<th>Year</th>';
+            vizModalTableHeadRow.innerHTML = `<th>${escapeHtml(t('year'))}</th>`;
             series.forEach((item) => { const th = document.createElement('th'); th.textContent = item.label; vizModalTableHeadRow.appendChild(th); });
             if (!(years.length && series.length)) {
-                vizModalTableBody.innerHTML = '<tr><td>No data available.</td></tr>';
+                vizModalTableBody.innerHTML = `<tr><td>${escapeHtml(t('no_data_available'))}</td></tr>`;
                 return;
             }
             const noteRow = renderNote ? `<tr><td colspan="${series.length + 1}" style="background:#EFF8FF;color:#0A2450;font-weight:700;">${escapeHtml(renderNote)}</td></tr>` : '';
@@ -1743,8 +1759,8 @@
         async function loadMapIndicators() {
             const indicators = await fetchIndicatorsByTopic(String(mapTopicSelect.value || ''));
             if (!indicators.length) {
-                mapIndicatorSelect.innerHTML = '<option value="">No indicators found</option>';
-                snapshotIndicatorSelect.innerHTML = '<option value="">No indicators found</option>';
+                mapIndicatorSelect.innerHTML = `<option value="">${escapeHtml(t('no_indicators'))}</option>`;
+                snapshotIndicatorSelect.innerHTML = `<option value="">${escapeHtml(t('no_indicators'))}</option>`;
                 return;
             }
             fillIndicatorSelect(mapIndicatorSelect, indicators, String(mapIndicatorSelect.value || ''));
@@ -1754,7 +1770,7 @@
         async function loadCompareIndicators() {
             const indicators = await fetchIndicatorsByTopic(String(compareTopicSelect.value || ''));
             if (!indicators.length) {
-                compareIndicatorSelect.innerHTML = '<option value="">No indicators found</option>';
+                compareIndicatorSelect.innerHTML = `<option value="">${escapeHtml(t('no_indicators'))}</option>`;
                 return;
             }
             fillIndicatorSelect(compareIndicatorSelect, indicators, String(compareIndicatorSelect.value || ''));
@@ -1809,7 +1825,7 @@
             });
             regionSelect.addEventListener('change', async () => {
                 if (state.loadingDepth > 0) return;
-                showLoadingModal('Loading region shapes and map data...');
+                showLoadingModal(t('loading_region_data'));
                 try {
                     await loadRegion(regionSelect.value);
                     if (mapIndicatorSelect.value) await runMapVisualization({ allowWhileLoading: true });
@@ -1819,7 +1835,7 @@
             });
             mapTopicSelect.addEventListener('change', async () => {
                 if (state.loadingDepth > 0) return;
-                showLoadingModal('Loading map indicators...');
+                showLoadingModal(t('loading_map_indicators'));
                 try {
                     await loadMapIndicators();
                     if (mapIndicatorSelect.value) await runMapVisualization({ allowWhileLoading: true });
@@ -1859,7 +1875,7 @@
                     await runContinentComparison({ openModal: true });
                     return;
                 }
-                showLoadingModal('Preparing multi-map modal...');
+                showLoadingModal(t('preparing_multi_map'));
                 try {
                     openMapCompareModal();
                     await renderMapCompareModalContent();
@@ -1872,7 +1888,7 @@
                 state.mapValuesByNormName.clear();
                 state.mapRows = [];
                 state.mapRange = { min: null, max: null };
-                state.mapIndicatorMeta = { label: 'Indicator', unit: '' };
+                state.mapIndicatorMeta = { label: t('indicator'), unit: '' };
                 state.mapVisibleRangePercent = { min: 0, max: 100 };
                 mapRangeMinSlider.value = '0';
                 mapRangeMaxSlider.value = '100';
@@ -1880,19 +1896,19 @@
                 state.mapCompareContext = null;
                 renderMapRangeLabel();
                 refreshMapStyles();
-                renderMapLegend('Indicator', '', null, null);
-                mapTopTableBody.innerHTML = '<tr><td colspan="3">Overlay cleared.</td></tr>';
-                mapDataTableBody.innerHTML = '<tr><td colspan="3">Overlay cleared.</td></tr>';
-                mapComparePanels.innerHTML = '<div class="empty-box">Run "Compare Selected Continents" to load multi-continent maps.</div>';
-                mapCompareCountryTableBody.innerHTML = '<tr><td colspan="3">No map comparison loaded yet.</td></tr>';
-                mapCompareGlobalTableBody.innerHTML = '<tr><td colspan="2">No global comparison loaded yet.</td></tr>';
-                setMapStatus('Map overlay cleared.');
+                renderMapLegend(t('indicator'), '', null, null);
+                mapTopTableBody.innerHTML = `<tr><td colspan="3">${escapeHtml(t('overlay_cleared'))}</td></tr>`;
+                mapDataTableBody.innerHTML = `<tr><td colspan="3">${escapeHtml(t('overlay_cleared'))}</td></tr>`;
+                mapComparePanels.innerHTML = `<div class="empty-box">${escapeHtml(t('run_multi_continent'))}</div>`;
+                mapCompareCountryTableBody.innerHTML = `<tr><td colspan="3">${escapeHtml(t('no_map_comparison'))}</td></tr>`;
+                mapCompareGlobalTableBody.innerHTML = `<tr><td colspan="2">${escapeHtml(t('no_global_comparison'))}</td></tr>`;
+                setMapStatus(t('map_overlay_cleared'));
             });
             countrySelect.addEventListener('change', async () => { const countryName = String(countrySelect.value || '').trim(); if (countryName) await selectCountry(countryName, resolveIso2ByName(countryName), false); });
             runSnapshotBtn.addEventListener('click', runSnapshotTrend);
             compareTopicSelect.addEventListener('change', async () => {
                 if (state.loadingDepth > 0) return;
-                showLoadingModal('Loading comparison indicators...');
+                showLoadingModal(t('loading_comparison_indicators'));
                 try {
                     await loadCompareIndicators();
                 } finally {
@@ -1922,13 +1938,13 @@
             runCompareBtn.addEventListener('click', runComparison);
             openCompareModalBtn.addEventListener('click', () => {
                 if (state.loadingDepth > 0) return;
-                if (!state.comparePayload) { setCompareStatus('Run comparison first, then open modal.', true); return; }
-                renderModalFromPayload(state.comparePayload, 'Comparison Studio Modal', state.comparePayload?.indicator?.name || 'Indicator comparison');
+                if (!state.comparePayload) { setCompareStatus(t('run_comparison_first'), true); return; }
+                renderModalFromPayload(state.comparePayload, t('comparison_modal'), state.comparePayload?.indicator?.name || t('indicator_comparison'));
             });
             openSnapshotModalBtn.addEventListener('click', () => {
                 if (state.loadingDepth > 0) return;
-                if (!state.snapshotPayload) { snapshotHint.textContent = 'Load snapshot trend first, then open modal.'; return; }
-                renderModalFromPayload(state.snapshotPayload, 'Country Snapshot Modal', state.snapshotPayload?.indicator?.name || 'Country trend');
+                if (!state.snapshotPayload) { snapshotHint.textContent = t('load_snapshot_first'); return; }
+                renderModalFromPayload(state.snapshotPayload, t('snapshot_modal'), state.snapshotPayload?.indicator?.name || t('country_trend'));
             });
             vizModalCloseBtn.addEventListener('click', closeVizModal);
             vizModal.addEventListener('click', (event) => { if (event.target === vizModal) closeVizModal(); });
@@ -1950,19 +1966,19 @@
 
         async function initializeDashboard() {
             syncNavbarOffset(); initializeYearInputs(); wireEvents(); syncCompareMode();
-            setMapStatus('Loading metadata and shapefiles...');
-            setCompareStatus('Loading World Bank topics, countries, and indicator catalog...');
+            setMapStatus(t('loading_metadata'));
+            setCompareStatus(t('loading_catalog'));
             setDashboardInitializing(true);
             try {
                 await Promise.all([loadWorldBankCountries(), loadContinents(), loadTopicsAndPrimeIndicators()]);
                 const initialRegion = (defaultRegion && shapeFilesByRegion[defaultRegion]) ? defaultRegion : (regionSelect.options.length ? regionSelect.options[0].value : null);
-                if (initialRegion) { regionSelect.value = initialRegion; await loadRegion(initialRegion); } else { setMapStatus('No region shapefiles configured. Check public/assets/Worldshapes.', true); }
+                if (initialRegion) { regionSelect.value = initialRegion; await loadRegion(initialRegion); } else { setMapStatus(t('no_region_shapes_configured'), true); }
                 if (mapIndicatorSelect.value) await runMapVisualization({ allowWhileLoading: true, showGlobalLoading: false });
-                setCompareStatus('Ready. Run side-by-side comparisons by country or continent.');
+                setCompareStatus(t('ready_compare'));
             } catch (error) {
                 console.error('Initialization failed', error);
-                setMapStatus('Could not initialize dashboard data sources.', true);
-                setCompareStatus('Could not initialize comparison controls.', true);
+                setMapStatus(t('dashboard_init_failed'), true);
+                setCompareStatus(t('comparison_init_failed'), true);
             } finally {
                 setDashboardInitializing(false);
             }

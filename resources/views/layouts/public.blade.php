@@ -1,5 +1,6 @@
+@php($documentDirection = config('localization.supported.'.app()->getLocale().'.direction', 'ltr'))
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ $documentDirection }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,17 +13,17 @@
     <link rel="stylesheet" href="{{ asset('admin/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/assets/vendors/css/feather.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/style.css') }}">
-    @if (app()->getLocale() === 'ar')
-        <link rel="stylesheet" href="{{ asset('assets/css/rtl.css') }}">
-    @endif
     <style>
         body.attp-public-page { margin: 0; background: #f4f7fa; font-family: Inter, sans-serif; color: #14213d; }
         .attp-public-main { min-height: calc(100vh - 280px); }
     </style>
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/3pap-public.css') }}">
+    @if ($documentDirection === 'rtl')
+        <link rel="stylesheet" href="{{ asset('assets/css/rtl.css') }}">
+    @endif
 </head>
-<body class="public-mobile-nav attp-public-page pmis-marketing-page" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<body class="public-mobile-nav attp-public-page pmis-marketing-page" dir="{{ $documentDirection }}">
     @include('partials.public-marketing-header')
 
     <main class="attp-public-main" id="main-content">

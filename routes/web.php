@@ -227,7 +227,7 @@ Route::post('/language/switch/{locale}', [LanguageController::class, 'switch'])-
 Route::get('/language/current', [LanguageController::class, 'current'])->name('language.current');
 Route::get('/language/available', [LanguageController::class, 'available'])->name('language.available');
 Route::get('/language/{locale}', [LanguageController::class, 'switch'])
-    ->where('locale', 'en|fr|ar|pt|es|sw')
+    ->whereIn('locale', array_keys((array) config('localization.supported', [])))
     ->name('language.select');
 
 Route::prefix('website-visit-tracker')

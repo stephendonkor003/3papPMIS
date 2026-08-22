@@ -1,4 +1,4 @@
-<section class="pmis-resource-strip" aria-label="3PAP PMIS public resources">
+<section class="pmis-resource-strip" aria-label="{{ __('gallery.strip.aria_label') }}">
     <style>
         .pmis-resource-strip { padding: 2.5rem 1.5rem; border-top: 1px solid #DBE4EE; border-bottom: 1px solid #DBE4EE; background: #EFF8FF; }
         .pmis-resource-strip__inner { width: min(1160px, 100%); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
@@ -11,10 +11,10 @@
         @media (max-width: 720px) { .pmis-resource-strip__inner { align-items: flex-start; flex-direction: column; } .pmis-resource-strip__links { width: 100%; } .pmis-resource-strip__links a { flex: 1; justify-content: center; } }
     </style>
     <div class="pmis-resource-strip__inner">
-        <div class="pmis-resource-strip__copy"><span>Public information</span><h2>Stay connected to delivery.</h2></div>
+        <div class="pmis-resource-strip__copy"><span>{{ __('gallery.strip.eyebrow') }}</span><h2>{{ __('gallery.strip.title') }}</h2></div>
         <div class="pmis-resource-strip__links">
-            <a href="{{ route('news.index') }}">News &amp; updates &rarr;</a>
-            <a href="{{ route('gallery') }}">Media &amp; insights</a>
+            <a href="{{ route('news.index') }}">{{ __('gallery.strip.news') }} &rarr;</a>
+            <a href="{{ route('gallery') }}">{{ __('gallery.strip.media') }}</a>
         </div>
     </div>
 </section>

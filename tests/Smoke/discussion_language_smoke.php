@@ -4,9 +4,9 @@ use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Http\Request;
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__.'/../../vendor/autoload.php';
 
-$app = require __DIR__ . '/../../bootstrap/app.php';
+$app = require __DIR__.'/../../bootstrap/app.php';
 $app->make(ConsoleKernel::class)->bootstrap();
 $kernel = $app->make(HttpKernel::class);
 
@@ -16,6 +16,40 @@ $pages = [
     '/discussion/join' => 'join',
 ];
 $locales = ['en', 'fr', 'ar', 'pt', 'es', 'sw'];
+
+if (array_keys((array) config('localization.supported', [])) !== $locales) {
+    fwrite(STDERR, "The central supported-locale configuration is incomplete or out of order.\n");
+    exit(1);
+}
+
+$flattenTranslationKeys = static function (array $translations, string $prefix = '') use (&$flattenTranslationKeys): array {
+    $keys = [];
+
+    foreach ($translations as $key => $value) {
+        $path = $prefix === '' ? (string) $key : $prefix.'.'.$key;
+
+        if (is_array($value)) {
+            array_push($keys, ...$flattenTranslationKeys($value, $path));
+        } else {
+            $keys[] = $path;
+        }
+    }
+
+    return $keys;
+};
+
+foreach (['landing', 'public'] as $domain) {
+    $referenceKeys = $flattenTranslationKeys(require base_path("lang/en/{$domain}.php"));
+
+    foreach (array_slice($locales, 1) as $locale) {
+        $localeKeys = $flattenTranslationKeys(require base_path("lang/{$locale}/{$domain}.php"));
+
+        if ($localeKeys !== $referenceKeys) {
+            fwrite(STDERR, "The {$locale} {$domain} catalog does not match the English key structure.\n");
+            exit(1);
+        }
+    }
+}
 
 foreach ($locales as $locale) {
     $translations = require base_path("lang/{$locale}/discussion.php");
@@ -148,9 +182,60 @@ $homeResponse = $kernel->handle($homeRequest);
 $home = (string) $homeResponse->getContent();
 $frenchLanding = require base_path('lang/fr/landing.php');
 
-if ($homeResponse->getStatusCode() !== 200 || ! str_contains($home, e($frenchLanding['hero_title']))) {
+if ($homeResponse->getStatusCode() !== 200
+    || ! str_contains($home, e($frenchLanding['home']['hero']['title_prefix']))
+    || ! str_contains($home, e($frenchLanding['home']['hero']['title_emphasis']))) {
     fwrite(STDERR, "The landing page did not render the localized French hero.\n");
     exit(1);
+}
+
+$frenchPublic = require base_path('lang/fr/public.php');
+foreach ([
+    $frenchPublic['utility_tagline'],
+    $frenchPublic['navigation']['capabilities'],
+    $frenchPublic['footer']['description'],
+] as $localizedShellCopy) {
+    if (! str_contains($home, e($localizedShellCopy))) {
+        fwrite(STDERR, "The landing page did not render its localized French public shell.\n");
+        exit(1);
+    }
+}
+
+foreach ($locales as $locale) {
+    $localizedRequest = Request::create("/?lang={$locale}", 'GET', [], [], [], [
+        'HTTP_HOST' => '127.0.0.1:8000',
+        'SERVER_PORT' => 8000,
+    ]);
+    $localizedResponse = $kernel->handle($localizedRequest);
+    $localizedHome = (string) $localizedResponse->getContent();
+    $landingTranslations = require base_path("lang/{$locale}/landing.php");
+    $publicTranslations = require base_path("lang/{$locale}/public.php");
+    $direction = config("localization.supported.{$locale}.direction");
+
+    $expectedCopy = [
+        $landingTranslations['home']['hero']['title_prefix'],
+        $landingTranslations['home']['hero']['title_emphasis'],
+        $landingTranslations['home']['principles']['title'],
+        $landingTranslations['home']['cta']['title'],
+        $publicTranslations['navigation']['portfolio_insights'],
+        $publicTranslations['footer']['description'],
+    ];
+
+    if ($localizedResponse->getStatusCode() !== 200
+        || ! str_contains($localizedHome, "<html lang=\"{$locale}\" dir=\"{$direction}\">")
+        || str_contains($localizedHome, 'landing.home.')
+        || str_contains($localizedHome, 'public.navigation.')
+        || str_contains($localizedHome, 'public.footer.')) {
+        fwrite(STDERR, "The landing page did not render a complete {$locale} document.\n");
+        exit(1);
+    }
+
+    foreach ($expectedCopy as $copy) {
+        if (! str_contains($localizedHome, e($copy))) {
+            fwrite(STDERR, "The landing page is missing localized {$locale} copy.\n");
+            exit(1);
+        }
+    }
 }
 
 foreach ($locales as $locale) {
@@ -199,6 +284,32 @@ $spanishDiscussion = require base_path('lang/es/discussion.php');
 
 if (! str_contains((string) $persistedResponse->getContent(), e($spanishDiscussion['current']['title']))) {
     fwrite(STDERR, "The preferred_locale cookie did not restore Spanish on the next request.\n");
+    exit(1);
+}
+
+$staleQuerySwitchRequest = Request::create('/language/pt', 'GET', [], [], [], [
+    'HTTP_HOST' => '127.0.0.1:8000',
+    'HTTP_REFERER' => 'http://127.0.0.1:8000/discussion/current?lang=fr&view=latest',
+    'SERVER_PORT' => 8000,
+]);
+$staleQuerySwitchResponse = $kernel->handle($staleQuerySwitchRequest);
+$staleQueryLocation = (string) $staleQuerySwitchResponse->headers->get('Location');
+
+if (! $staleQuerySwitchResponse->isRedirect()
+    || $staleQueryLocation !== 'http://127.0.0.1:8000/discussion/current?lang=pt&view=latest') {
+    fwrite(STDERR, "The language switch did not replace a stale lang query parameter.\n");
+    exit(1);
+}
+
+$externalRefererRequest = Request::create('/language/sw', 'GET', [], [], [], [
+    'HTTP_HOST' => '127.0.0.1:8000',
+    'HTTP_REFERER' => 'https://example.net/redirect-target?lang=en',
+    'SERVER_PORT' => 8000,
+]);
+$externalRefererResponse = $kernel->handle($externalRefererRequest);
+
+if (! $externalRefererResponse->isRedirect('http://127.0.0.1:8000')) {
+    fwrite(STDERR, "The language switch accepted an external return URL.\n");
     exit(1);
 }
 
