@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use Database\Seeders\MasterAdminSeeder;
 use Illuminate\Contracts\Console\Kernel as ConsoleKernel;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Http\Request;
@@ -12,7 +11,7 @@ require __DIR__.'/../../vendor/autoload.php';
 $app = require __DIR__.'/../../bootstrap/app.php';
 $app->make(ConsoleKernel::class)->bootstrap();
 
-$user = User::where('email', MasterAdminSeeder::EMAIL)->first();
+$user = User::where('user_type', 'admin')->orderBy('id')->first();
 if (! $user) {
     fwrite(STDOUT, "SIDEBAR_ROUTES_SKIPPED no seeded master administrator\n");
     exit(0);

@@ -8,7 +8,6 @@ use App\Models\GrmLevel;
 use App\Models\Permission;
 use App\Models\Program;
 use App\Models\User;
-use Database\Seeders\MasterAdminSeeder;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithAuthentication;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithSession;
@@ -158,7 +157,7 @@ class GrmPublicAnonymousSmoke
 
     private function assertOfficerCanRecordOriginalChannel(Program $program): void
     {
-        $officer = User::query()->where('email', MasterAdminSeeder::EMAIL)->firstOrFail();
+        $officer = User::query()->where('user_type', 'admin')->orderBy('id')->firstOrFail();
         $officer->forceFill([
             'email_verified_at' => $officer->email_verified_at ?: now(),
             'password_changed_at' => now(),

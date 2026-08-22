@@ -17,6 +17,8 @@ class MasterAdminSeeder extends Seeder
 
     public const ALTERNATE_EMAIL = 'alternate.master.admin@example.invalid';
 
+    private const EMAILS_ENV = 'MASTER_ADMIN_EMAILS';
+
     private const EMAIL_ENV = 'MASTER_ADMIN_EMAIL';
 
     private const ALTERNATE_EMAIL_ENV = 'MASTER_ADMIN_ALTERNATE_EMAIL';
@@ -32,10 +34,7 @@ class MasterAdminSeeder extends Seeder
             ['description' => 'Full system administrator']
         );
 
-        $admins = collect([
-            [$this->configuredEmail(self::EMAIL_ENV, self::EMAIL), self::PASSWORD_ENV],
-            [$this->configuredEmail(self::ALTERNATE_EMAIL_ENV, self::ALTERNATE_EMAIL), self::ALTERNATE_PASSWORD_ENV],
-        ])->map(function (array $account) use ($role): User {
+        $admins = collect($this->configuredAccounts())->map(function (array $account) use ($role): User {
             [$email, $passwordEnvironment] = $account;
             $admin = User::firstOrNew(['email' => $email]);
             $isNew = ! $admin->exists;
@@ -60,9 +59,13 @@ class MasterAdminSeeder extends Seeder
 
             $admin->save();
 
-            $isNew
-                ? $this->reportNewAccount($email, $passwordEnvironment, $password, $wasGenerated)
-                : $this->command?->line("Existing bootstrap account {$email} kept its password, password-change status, and account restrictions.");
+            if ($isNew) {
+                $this->reportNewAccount($email, $passwordEnvironment, $password, $wasGenerated);
+            } else {
+                $this->command?->line(
+                    "Existing bootstrap account {$email} kept its password, password-change status, and account restrictions."
+                );
+            }
 
             return $admin;
         });
@@ -71,10 +74,45 @@ class MasterAdminSeeder extends Seeder
         $admins->each(fn (User $admin) => $admin->permissions()->sync(Permission::pluck('id')->all()));
     }
 
+    /** @return array<int, array{string, string}> */
+    private function configuredAccounts(): array
+    {
+        $configuredEmails = trim((string) env(self::EMAILS_ENV, ''));
+
+        if ($configuredEmails !== '') {
+            $emails = array_values(array_unique(array_filter(
+                array_map('trim', explode(',', $configuredEmails)),
+                static fn (string $email): bool => $email !== ''
+            )));
+
+            if ($emails === []) {
+                throw new RuntimeException(self::EMAILS_ENV.' must contain at least one email address.');
+            }
+
+            return array_map(
+                fn (string $email): array => [
+                    $this->validateEmail($email, self::EMAILS_ENV),
+                    self::PASSWORD_ENV,
+                ],
+                $emails
+            );
+        }
+
+        return [
+            [$this->configuredEmail(self::EMAIL_ENV, self::EMAIL), self::PASSWORD_ENV],
+            [$this->configuredEmail(self::ALTERNATE_EMAIL_ENV, self::ALTERNATE_EMAIL), self::ALTERNATE_PASSWORD_ENV],
+        ];
+    }
+
     private function configuredEmail(string $environmentVariable, string $default): string
     {
         $email = trim((string) env($environmentVariable, $default));
 
+        return $this->validateEmail($email, $environmentVariable);
+    }
+
+    private function validateEmail(string $email, string $environmentVariable): string
+    {
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException("{$environmentVariable} must contain a valid email address.");
         }

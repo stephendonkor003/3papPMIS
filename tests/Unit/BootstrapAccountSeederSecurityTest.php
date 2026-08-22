@@ -49,6 +49,7 @@ it('uses configurable example identities for direct bootstrap accounts', functio
     expect($master)
         ->toContain("public const EMAIL = 'master.admin@example.invalid'")
         ->toContain("public const ALTERNATE_EMAIL = 'alternate.master.admin@example.invalid'")
+        ->toContain('MASTER_ADMIN_EMAILS')
         ->toContain('MASTER_ADMIN_EMAIL')
         ->toContain('MASTER_ADMIN_ALTERNATE_EMAIL')
         ->and($secondary)
