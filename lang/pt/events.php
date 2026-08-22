@@ -1,0 +1,17 @@
+<?php
+
+return [
+    'meta' => ['title' => 'Eventos e webinars | 3PAP PMIS', 'description' => 'Descubra eventos, demonstrações do produto e sessões para profissionais do 3PAP PMIS dedicados à gestão de portfólios ligada e responsável.'],
+    'hero' => ['eyebrow' => 'Intercâmbio de conhecimento 3PAP PMIS', 'title' => 'Eventos e webinars', 'lead' => 'Conversas práticas para líderes e equipas de execução que transformam estratégia em execução visível e governada nos portfólios, programas, projetos e fundos.', 'ask' => 'Perguntar sobre próximas sessões', 'faqs' => 'Explorar as perguntas frequentes', 'mail_subject' => 'Consulta sobre evento 3PAP PMIS'],
+    'brief' => ['aria_label' => 'Foco da sessão', 'label' => 'Foco da sessão', 'title' => 'Uma visão governada da execução empresarial', 'items' => ['Visibilidade de portfólios e programas para decisores', 'Fluxos ligados de financiamento, aquisições, riscos e desempenho', 'Evidências rastreáveis e relatórios prontos para decisão']],
+    'schedule' => ['kicker' => 'Agenda', 'title' => 'Próximas sessões públicas', 'description' => 'As sessões confirmadas serão publicadas aqui com data, formato, público e detalhes de inscrição.', 'empty_title' => 'Não há sessões públicas agendadas neste momento', 'empty_description' => 'Para uma conversa personalizada, contacte a equipa 3PAP indicando a sua organização e o caso de uso prioritário.', 'visit' => 'Visitar 3pap.africa'],
+    'formats' => ['kicker' => 'O que esperar', 'title' => 'Sessões concebidas em torno do trabalho real', 'description' => 'Cada formato liga as capacidades da plataforma às questões diárias de governação, coordenação e reporte.', 'items' => [
+        ['label' => 'DEMONSTRAR', 'title' => 'Demonstrações da plataforma', 'description' => 'Veja como o PMIS liga portfólios, programas, projetos, fundos, aquisições, pessoas e desempenho num ambiente.'],
+        ['label' => 'IMPLEMENTAR', 'title' => 'Sessões de implementação', 'description' => 'Explore governação configurável, fluxos por função, integração e um caminho prático da configuração à adoção.'],
+        ['label' => 'TROCAR', 'title' => 'Intercâmbios de profissionais', 'description' => 'Partilhe abordagens à supervisão, governação financeira, garantia da execução, evidências e apoio à decisão.'],
+    ]],
+    'lifecycle' => ['kicker' => 'Ciclo de vida ligado', 'title' => 'Da prioridade estratégica ao resultado verificado', 'description' => 'O nosso programa acompanha todo o ciclo de execução para manter contexto, responsabilidades e evidências ligados em cada fase.', 'aria_label' => 'Ciclo de execução do PMIS', 'items' => [
+        ['title' => 'Priorizar', 'description' => 'Alinhar procura e investimento com a estratégia.'], ['title' => 'Planear', 'description' => 'Estruturar resultados, recursos e controlos.'], ['title' => 'Executar', 'description' => 'Coordenar trabalho, parceiros e decisões.'], ['title' => 'Garantir', 'description' => 'Monitorizar desempenho, riscos e evidências.'], ['title' => 'Aprender', 'description' => 'Avaliar resultados e melhorar o investimento.'],
+    ]],
+    'cta' => ['kicker' => 'Inicie uma conversa', 'title' => 'Precisa de uma sessão adaptada à sua instituição?', 'description' => 'Conte-nos sobre o seu ambiente de execução, as equipas envolvidas e as decisões que o PMIS deve apoiar.', 'contact' => 'Contactar a equipa 3PAP', 'mail_subject' => 'Sessão 3PAP PMIS personalizada'],
+];

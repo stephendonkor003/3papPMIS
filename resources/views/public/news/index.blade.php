@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+@php
+    $locale = app()->getLocale();
+    $direction = config("localization.supported.{$locale}.direction", 'ltr');
+@endphp
+<html lang="{{ $locale }}" dir="{{ $direction }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News & Updates | 3PAP PMIS</title>
-    <meta name="description" content="Approved 3PAP PMIS announcements, policy updates, research news, events, and public communications.">
+    <title>{{ __('news_public.meta.title') }}</title>
+    <meta name="description" content="{{ __('news_public.meta.description') }}">
     <link rel="icon" href="{{ asset('assets/images/3pap-icon.svg') }}" type="image/svg+xml">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/style.css') }}">
@@ -183,33 +187,36 @@
         }
     </style>
     <link rel="stylesheet" href="{{ asset('assets/css/3pap-public.css') }}">
+    @if($direction === 'rtl')
+        <link rel="stylesheet" href="{{ asset('assets/css/rtl.css') }}">
+    @endif
 </head>
-<body class="public-mobile-nav pmis-marketing-page" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<body class="public-mobile-nav pmis-marketing-page" dir="{{ $direction }}">
 @include('partials.public-marketing-header')
 
 <!-- ── HERO ── -->
 <section class="news-hero" id="main-content" tabindex="-1">
     <div>
-        <h1>News &amp; Updates</h1>
-        <p>Approved 3PAP PMIS announcements, policy updates, research findings, events, and public communications from across the continent.</p>
+        <h1>{{ __('news_public.hero.title') }}</h1>
+        <p>{{ __('news_public.hero.description') }}</p>
     </div>
 </section>
 
 <!-- ── FILTER BAR ── -->
 <div class="filter-wrap">
     <form class="filter-bar" method="GET" action="{{ route('news.index') }}">
-        <input name="q" value="{{ request('q') }}" placeholder="Search news and updates…" aria-label="Search">
-        <select name="category" aria-label="Category">
-            <option value="">All categories</option>
+        <input name="q" value="{{ request('q') }}" placeholder="{{ __('news_public.filters.search_placeholder') }}" aria-label="{{ __('news_public.filters.search_label') }}">
+        <select name="category" aria-label="{{ __('news_public.filters.category_label') }}">
+            <option value="">{{ __('news_public.filters.all_categories') }}</option>
             @foreach($categories as $cat)
                 <option value="{{ $cat }}" @selected(request('category') === $cat)>
                     {{ ucfirst(str_replace('_', ' ', $cat)) }}
                 </option>
             @endforeach
         </select>
-        <button type="submit">Search</button>
+        <button type="submit">{{ __('news_public.filters.search_button') }}</button>
         @if(request('q') || request('category'))
-            <a href="{{ route('news.index') }}" style="padding:11px 16px;border-radius:8px;border:1.5px solid #DBE4EE;color:#283B58;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;">Clear</a>
+            <a href="{{ route('news.index') }}" style="padding:11px 16px;border-radius:8px;border:1.5px solid #DBE4EE;color:#283B58;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;">{{ __('news_public.filters.clear') }}</a>
         @endif
     </form>
 </div>
@@ -222,10 +229,10 @@
 
     @if(request('q') || request('category'))
         <p style="color:#60728B;margin-bottom:20px;">
-            Showing results
-            @if(request('q')) for "<strong>{{ request('q') }}</strong>"@endif
-            @if(request('category')) in category "<strong>{{ ucfirst(str_replace('_', ' ', request('category'))) }}</strong>"@endif
-            — {{ $posts->total() }} {{ Str::plural('result', $posts->total()) }}
+            {{ __('news_public.results.showing') }}
+            @if(request('q')) {{ __('news_public.results.for_query') }} "<strong>{{ request('q') }}</strong>"@endif
+            @if(request('category')) {{ __('news_public.results.in_category') }} "<strong>{{ ucfirst(str_replace('_', ' ', request('category'))) }}</strong>"@endif
+            — {{ trans_choice('news_public.results.count', $posts->total(), ['count' => $posts->total()]) }}
         </p>
     @endif
 
@@ -242,16 +249,16 @@
                     <span class="card-badge">{{ str_replace('_', ' ', $post->category) }}</span>
                     <a class="card-title" href="{{ route('news.show', $post) }}">{{ $post->title }}</a>
                     <div class="card-meta">
-                        {{ optional($post->published_at)->format('d M Y') }}
+                        {{ $post->published_at?->locale($locale)->translatedFormat('d M Y') }}
                     </div>
                     <p class="card-excerpt">{{ $post->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($post->body), 140) }}</p>
-                    <a class="card-link" href="{{ route('news.show', $post) }}">Read more &rarr;</a>
+                    <a class="card-link" href="{{ route('news.show', $post) }}">{{ __('news_public.cards.read_more') }} &rarr;</a>
                 </div>
             </article>
         @empty
             <div class="news-empty">
-                <h2>No approved news yet</h2>
-                <p>Approved 3PAP PMIS news and communications will appear here once published.</p>
+                <h2>{{ __('news_public.empty.title') }}</h2>
+                <p>{{ __('news_public.empty.description') }}</p>
             </div>
         @endforelse
     </section>
@@ -265,13 +272,13 @@
     <!-- ── SUBSCRIBE BANNER ── -->
     <div class="subscribe-banner">
         <div>
-            <h2>Subscribe to 3PAP PMIS News</h2>
-            <p>Get an email when new approved 3PAP PMIS news or communications are published.</p>
+            <h2>{{ __('news_public.subscribe.title') }}</h2>
+            <p>{{ __('news_public.subscribe.description') }}</p>
         </div>
         <form class="sub-form" method="POST" action="{{ route('news.subscribe') }}">
             @csrf
-            <input type="email" name="email" placeholder="your@email.com" required aria-label="Email address">
-            <button type="submit">Subscribe</button>
+            <input type="email" name="email" placeholder="{{ __('news_public.subscribe.email_placeholder') }}" required aria-label="{{ __('news_public.subscribe.email_label') }}">
+            <button type="submit">{{ __('news_public.subscribe.button') }}</button>
         </form>
     </div>
 </main>

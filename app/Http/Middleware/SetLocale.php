@@ -11,16 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 class SetLocale
 {
     /**
-     * Available locales for the application.
-     *
-     * @var array
-     */
-    protected $availableLocales = ['en', 'fr', 'ar', 'pt', 'es', 'sw'];
-
-    /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -49,15 +42,13 @@ class SetLocale
      * 3. Cookie
      * 4. Browser Accept-Language header
      * 5. Default from config
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return string
      */
     protected function determineLocale(Request $request): string
     {
         // 1. Check URL parameter (?lang=fr)
-        if ($request->has('lang') && $this->isValidLocale($request->input('lang'))) {
-            return $request->input('lang');
+        $requestedLocale = $request->query('lang');
+        if (is_string($requestedLocale) && $this->isValidLocale($requestedLocale)) {
+            return $requestedLocale;
         }
 
         // 2. Check session
@@ -82,26 +73,20 @@ class SetLocale
 
     /**
      * Check if the given locale is valid/available.
-     *
-     * @param  string|null  $locale
-     * @return bool
      */
     protected function isValidLocale(?string $locale): bool
     {
-        return $locale && in_array($locale, $this->availableLocales);
+        return $locale !== null && in_array($locale, $this->availableLocales(), true);
     }
 
     /**
      * Get browser preferred language from Accept-Language header.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return string|null
      */
     protected function getBrowserLocale(Request $request): ?string
     {
         $acceptLanguage = $request->header('Accept-Language');
 
-        if (!$acceptLanguage) {
+        if (! $acceptLanguage) {
             return null;
         }
 
@@ -133,5 +118,13 @@ class SetLocale
             false,
             config('session.same_site', 'lax')
         ));
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function availableLocales(): array
+    {
+        return array_keys((array) config('localization.supported', []));
     }
 }

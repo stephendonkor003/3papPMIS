@@ -51,25 +51,13 @@ class AttpWorkPlan2025Seeder extends Seeder
 
             $this->syncMissingSubActivityAllocation($subActivity, $amount);
 
-            $purchaseRequest = PurchaseRequest::updateOrCreate(
-                ['reference_no' => $reference],
-                [
-                    'program_funding_id' => $funding->id,
-                    'governance_node_id' => $funding->governance_node_id,
-                    'allocation_level' => 'sub_activity',
-                    'allocation_id' => $subActivity->id,
-                    'start_year' => self::FISCAL_YEAR,
-                    'commitment_date' => self::FISCAL_YEAR.'-01-01',
-                    'delivery_date' => self::FISCAL_YEAR.'-12-31',
-                    'currency' => 'USD',
-                    'total_amount' => $amount,
-                    'description' => 'FY2025 ATTP work plan item: '.$row['activity'],
-                    'status' => 'approved',
-                    'work_plan_source' => self::SOURCE,
-                    'work_plan_component' => $row['component'],
-                    'work_plan_sub_component' => $row['sub_component'],
-                    'created_by' => $createdBy,
-                ]
+            $purchaseRequest = $this->syncPurchaseRequest(
+                $reference,
+                $funding,
+                $subActivity,
+                $row,
+                $amount,
+                $createdBy
             );
 
             $item = PurchaseRequestItem::updateOrCreate(
@@ -101,60 +89,184 @@ class AttpWorkPlan2025Seeder extends Seeder
                 ]
             );
 
-            $commitment = BudgetCommitment::updateOrCreate(
-                ['purchase_request_id' => $purchaseRequest->id],
-                [
-                    'program_funding_id' => $funding->id,
-                    'governance_node_id' => $funding->governance_node_id,
-                    'resource_category_id' => $category->id,
-                    'resource_id' => $resource->id,
-                    'allocation_level' => 'sub_activity',
-                    'allocation_id' => $subActivity->id,
-                    'commitment_amount' => $amount,
-                    'commitment_year' => self::FISCAL_YEAR,
-                    'status' => BudgetCommitment::STATUS_APPROVED,
-                    'description' => 'FY2025 ATTP work plan commitment: '.$row['activity'],
-                    'created_by' => $createdBy,
-                    'approved_by' => $createdBy,
-                    'approved_at' => now(),
-                ]
+            $commitment = $this->syncBudgetCommitment(
+                $purchaseRequest,
+                $funding,
+                $subActivity,
+                $category,
+                $resource,
+                $row,
+                $amount,
+                $createdBy
             );
 
-            ApprovedWorkPlan::updateOrCreate(
-                ['budget_commitment_id' => $commitment->id],
-                [
-                    'awp_code' => sprintf('AWP-%s-ITEM-%03d', self::FISCAL_YEAR, $index + 1),
-                    'title' => $row['activity'],
-                    'program_funding_id' => $funding->id,
-                    'governance_node_id' => $funding->governance_node_id,
-                    'fiscal_year' => (string) self::FISCAL_YEAR,
-                    'planned_amount' => $amount,
-                    'currency' => 'USD',
-                    'start_date' => self::FISCAL_YEAR.'-01-01',
-                    'end_date' => self::FISCAL_YEAR.'-12-31',
-                    'status' => 'approved',
-                    'description' => $row['component']."\n".$row['sub_component'],
-                    'expected_outputs' => $row['result_indicator'] ?: $row['intermediate_indicator'],
-                    'implementation_notes' => trim(($row['observations'] ?? '')."\n".($row['world_bank_comments'] ?? '')),
-                    'created_by' => $createdBy,
-                    'approved_by' => $createdBy,
-                    'approved_at' => now(),
-                    'review_notes' => $row['world_bank_comments'] ?: null,
-                ]
+            $this->syncApprovedWorkPlan(
+                $commitment,
+                $funding,
+                $row,
+                $amount,
+                sprintf('AWP-%s-ITEM-%03d', self::FISCAL_YEAR, $index + 1),
+                $createdBy
             );
 
-            ApprovedWorkPlanItemReview::updateOrCreate(
-                ['purchase_request_item_id' => $item->id],
-                [
-                    'program_funding_id' => $funding->id,
-                    'funder_id' => $funder->id,
-                    'status' => $this->worldBankStatus($row['world_bank_comments']),
-                    'reviewed_by' => $row['world_bank_comments'] ? $createdBy : null,
-                    'reviewed_at' => $row['world_bank_comments'] ? now() : null,
-                    'review_notes' => $row['world_bank_comments'] ?: null,
-                ]
-            );
+            $this->syncApprovedWorkPlanItemReview($item, $funding, $funder, $row, $createdBy);
         }
+    }
+
+    private function syncPurchaseRequest(
+        string $reference,
+        ProgramFunding $funding,
+        SubActivity $subActivity,
+        array $row,
+        float $amount,
+        ?string $createdBy
+    ): PurchaseRequest {
+        $purchaseRequest = PurchaseRequest::firstOrNew(['reference_no' => $reference]);
+        $isNew = ! $purchaseRequest->exists;
+
+        $purchaseRequest->fill([
+            'program_funding_id' => $funding->id,
+            'governance_node_id' => $funding->governance_node_id,
+            'allocation_level' => 'sub_activity',
+            'allocation_id' => $subActivity->id,
+            'start_year' => self::FISCAL_YEAR,
+            'commitment_date' => self::FISCAL_YEAR.'-01-01',
+            'delivery_date' => self::FISCAL_YEAR.'-12-31',
+            'currency' => 'USD',
+            'total_amount' => $amount,
+            'description' => 'FY2025 ATTP work plan item: '.$row['activity'],
+            'work_plan_source' => self::SOURCE,
+            'work_plan_component' => $row['component'],
+            'work_plan_sub_component' => $row['sub_component'],
+        ]);
+
+        if ($isNew) {
+            $purchaseRequest->fill([
+                'status' => 'approved',
+                'created_by' => $createdBy,
+            ]);
+        }
+
+        $purchaseRequest->save();
+
+        return $purchaseRequest;
+    }
+
+    private function syncBudgetCommitment(
+        PurchaseRequest $purchaseRequest,
+        ProgramFunding $funding,
+        SubActivity $subActivity,
+        ResourceCategory $category,
+        Resource $resource,
+        array $row,
+        float $amount,
+        ?string $createdBy
+    ): BudgetCommitment {
+        $commitment = BudgetCommitment::firstOrNew([
+            'purchase_request_id' => $purchaseRequest->id,
+        ]);
+        $isNew = ! $commitment->exists;
+
+        $commitment->fill([
+            'program_funding_id' => $funding->id,
+            'governance_node_id' => $funding->governance_node_id,
+            'resource_category_id' => $category->id,
+            'resource_id' => $resource->id,
+            'allocation_level' => 'sub_activity',
+            'allocation_id' => $subActivity->id,
+            'commitment_amount' => $amount,
+            'commitment_year' => self::FISCAL_YEAR,
+            'description' => 'FY2025 ATTP work plan commitment: '.$row['activity'],
+        ]);
+
+        if ($isNew) {
+            $commitment->fill([
+                'status' => BudgetCommitment::STATUS_APPROVED,
+                'created_by' => $createdBy,
+                'approved_by' => $createdBy,
+                'approved_at' => now(),
+            ]);
+        }
+
+        $commitment->save();
+
+        return $commitment;
+    }
+
+    private function syncApprovedWorkPlanItemReview(
+        PurchaseRequestItem $item,
+        ProgramFunding $funding,
+        Funder $funder,
+        array $row,
+        ?string $createdBy
+    ): void {
+        $review = ApprovedWorkPlanItemReview::firstOrNew([
+            'purchase_request_item_id' => $item->id,
+        ]);
+        $isNew = ! $review->exists;
+
+        $review->fill([
+            'program_funding_id' => $funding->id,
+            'funder_id' => $funder->id,
+        ]);
+
+        if ($isNew) {
+            $review->fill([
+                'status' => $this->worldBankStatus($row['world_bank_comments']),
+                'reviewed_by' => $row['world_bank_comments'] ? $createdBy : null,
+                'reviewed_at' => $row['world_bank_comments'] ? now() : null,
+                'review_notes' => $row['world_bank_comments'] ?: null,
+            ]);
+        }
+
+        $review->save();
+    }
+
+    private function syncApprovedWorkPlan(
+        BudgetCommitment $commitment,
+        ProgramFunding $funding,
+        array $row,
+        float $amount,
+        string $awpCode,
+        ?string $createdBy
+    ): void {
+        // The code is the stable identity imported from the FY2025 workbook.
+        // Commitment rows can be deleted and recreated, leaving this nullable
+        // foreign key empty through nullOnDelete(). Fall back to the current
+        // commitment only for installations seeded before code-based matching.
+        $workPlan = ApprovedWorkPlan::where('awp_code', $awpCode)->first()
+            ?? ApprovedWorkPlan::where('budget_commitment_id', $commitment->id)->first()
+            ?? new ApprovedWorkPlan;
+
+        $isNew = ! $workPlan->exists;
+
+        $workPlan->fill([
+            'awp_code' => $awpCode,
+            'title' => $row['activity'],
+            'budget_commitment_id' => $commitment->id,
+            'program_funding_id' => $funding->id,
+            'governance_node_id' => $funding->governance_node_id,
+            'fiscal_year' => (string) self::FISCAL_YEAR,
+            'planned_amount' => $amount,
+            'currency' => 'USD',
+            'start_date' => self::FISCAL_YEAR.'-01-01',
+            'end_date' => self::FISCAL_YEAR.'-12-31',
+            'description' => $row['component']."\n".$row['sub_component'],
+            'expected_outputs' => $row['result_indicator'] ?: $row['intermediate_indicator'],
+        ]);
+
+        if ($isNew) {
+            $workPlan->fill([
+                'status' => 'approved',
+                'implementation_notes' => trim(($row['observations'] ?? '')."\n".($row['world_bank_comments'] ?? '')),
+                'created_by' => $createdBy,
+                'approved_by' => $createdBy,
+                'approved_at' => now(),
+                'review_notes' => $row['world_bank_comments'] ?: null,
+            ]);
+        }
+
+        $workPlan->save();
     }
 
     private function resolveProgram(?string $createdBy): Program

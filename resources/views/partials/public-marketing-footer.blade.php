@@ -9,34 +9,34 @@
     <div class="pmis-container pmis-footer__grid">
         <div class="pmis-footer__brand">
             <img src="{{ asset('assets/images/3pap-logo-white.png') }}" alt="3PAP">
-            <strong>Portfolio Management Information System</strong>
-            <p>One governed platform for portfolios, programmes, projects, funds, procurement, people, compliance, and performance.</p>
+            <strong>{{ __('public.brand_subtitle') }}</strong>
+            <p>{{ __('public.footer.description') }}</p>
         </div>
         <div>
-            <h2>Platform</h2>
-            <a href="{{ $landingSectionUrl('capabilities') }}">Capabilities</a>
-            <a href="{{ $landingSectionUrl('lifecycle') }}">Delivery lifecycle</a>
-            <a href="{{ route('impact.map') }}">Portfolio insights</a>
-            <a href="{{ route('world.indicators.performance') }}">Performance analytics</a>
+            <h2>{{ __('public.footer.platform') }}</h2>
+            <a href="{{ $landingSectionUrl('capabilities') }}">{{ __('public.navigation.capabilities') }}</a>
+            <a href="{{ $landingSectionUrl('lifecycle') }}">{{ __('public.footer.delivery_lifecycle') }}</a>
+            <a href="{{ route('impact.map') }}">{{ __('public.navigation.portfolio_insights') }}</a>
+            <a href="{{ route('world.indicators.performance') }}">{{ __('public.navigation.performance_analytics') }}</a>
         </div>
         <div>
-            <h2>Public access</h2>
-            <a href="{{ route('public.procurement.index') }}">Procurement</a>
-            <a href="{{ route('discussion.current') }}">Community discussions</a>
-            <a href="{{ route('news.index') }}">News &amp; updates</a>
-            <a href="{{ route('events') }}">Events</a>
-            <a href="{{ route('gallery') }}">Gallery</a>
-            <a href="{{ route('careers.index') }}">Careers</a>
+            <h2>{{ __('public.footer.public_access') }}</h2>
+            <a href="{{ route('public.procurement.index') }}">{{ __('public.footer.procurement') }}</a>
+            <a href="{{ route('discussion.current') }}">{{ __('public.footer.discussions') }}</a>
+            <a href="{{ route('news.index') }}">{{ __('public.footer.news') }}</a>
+            <a href="{{ route('events') }}">{{ __('public.footer.events') }}</a>
+            <a href="{{ route('gallery') }}">{{ __('public.footer.gallery') }}</a>
+            <a href="{{ route('careers.index') }}">{{ __('public.footer.careers') }}</a>
         </div>
         <div>
-            <h2>Contact</h2>
+            <h2>{{ __('public.footer.contact') }}</h2>
             <a href="mailto:info@3pap.com">info@3pap.com</a>
             <a href="https://3pap.africa" target="_blank" rel="noopener noreferrer">3pap.africa</a>
-            <a href="{{ route('public.grievances.create') }}">Feedback &amp; grievances</a>
+            <a href="{{ route('public.grievances.create') }}">{{ __('public.footer.feedback') }}</a>
         </div>
     </div>
     <div class="pmis-container pmis-footer__bottom">
-        <span>&copy; {{ date('Y') }} 3PAP. All rights reserved.</span>
-        <span>3PAP PMIS &middot; Portfolio Management Information System</span>
+        <span>{{ __('public.footer.rights_reserved', ['year' => date('Y')]) }}</span>
+        <span>{{ __('public.footer.product_name') }}</span>
     </div>
 </footer>

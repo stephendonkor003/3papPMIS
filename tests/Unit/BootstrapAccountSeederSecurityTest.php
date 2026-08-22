@@ -1,6 +1,6 @@
 <?php
 
-it('keeps explicit account bootstrap and legacy dump import out of ordinary seeding', function () {
+it('runs deployment super-admin provisioning last while keeping unsafe imports out of ordinary seeding', function () {
     $defaultSeeder = file_get_contents(
         dirname(__DIR__, 2).'/database/seeders/DatabaseSeeder.php'
     );
@@ -8,16 +8,18 @@ it('keeps explicit account bootstrap and legacy dump import out of ordinary seed
     expect($defaultSeeder)
         ->not->toContain('LegacySqlDumpSeeder::class')
         ->not->toContain('OldDataSqlImportSeeder::class')
-        ->not->toContain('MasterAdminSeeder::class')
+        ->toContain('MasterAdminSeeder::class')
         ->not->toContain('SecondarySuperAdminSeeder::class')
         ->not->toContain('WorldBankPartnerAccessSeeder::class')
         ->toContain('ConsortiumThinkTankMembershipSeeder::class');
+
+    expect(strpos($defaultSeeder, 'MasterAdminSeeder::class'))
+        ->toBeGreaterThan(strpos($defaultSeeder, 'SystemAdminAccessSeeder::class'));
 });
 
-it('provisions direct bootstrap accounts without committed or reusable passwords', function () {
+it('provisions optional direct bootstrap accounts without committed or reusable passwords', function () {
     $root = dirname(__DIR__, 2).'/database/seeders/';
     $seeders = [
-        'MasterAdminSeeder.php' => 'MASTER_ADMIN_BOOTSTRAP_PASSWORD',
         'SecondarySuperAdminSeeder.php' => 'SECONDARY_SUPER_ADMIN_BOOTSTRAP_PASSWORD',
         'WorldBankPartnerAccessSeeder.php' => 'WORLD_BANK_PARTNER_BOOTSTRAP_PASSWORD',
     ];
@@ -40,19 +42,60 @@ it('provisions direct bootstrap accounts without committed or reusable passwords
     }
 });
 
-it('uses configurable example identities for direct bootstrap accounts', function () {
+it('provisions the approved deployment super admins without publishing the plaintext password', function () {
+    $root = dirname(__DIR__, 2);
+    $source = file_get_contents($root.'/database/seeders/MasterAdminSeeder.php');
+    $configSource = file_get_contents($root.'/config/super-admins.php');
+    $config = require $root.'/config/super-admins.php';
+    $emails = array_column($config['accounts'], 'email');
+
+    expect($emails)
+        ->toBe([
+            'stephendonkor003@gmail.com',
+            'nzadon123@proton.me',
+            'tchirwa@gmail.com',
+            'info@3pap.africa',
+        ])
+        ->and(array_unique($emails))->toHaveCount(4)
+        ->and(password_get_info($config['bootstrap_password_hash'])['algoName'])->toBe('bcrypt')
+        ->and($configSource)
+        ->toContain("'bootstrap_password' => env('MASTER_ADMIN_BOOTSTRAP_PASSWORD')")
+        ->toContain("'synchronize_password_on_seed' =>")
+        ->toContain("'force_password_change' =>")
+        ->not->toMatch("/'bootstrap_password'\\s*=>\\s*['\"][^'\"]+['\"]/i")
+        ->and($source)
+        ->toContain("config('super-admins.email_override'")
+        ->toContain("config('super-admins.bootstrap_password'")
+        ->toContain("'must_change_password' => \$forcePasswordChange")
+        ->toContain("'is_disabled' => false")
+        ->toContain("'is_blacklisted' => false")
+        ->toContain('if ($isNew)')
+        ->toContain('User::firstOrNew(')
+        ->not->toContain('User::updateOrCreate(')
+        ->not->toMatch('/Hash::make\(\s*[\'\"]/');
+
+    $newAccountBlock = substr(
+        $source,
+        strpos($source, 'if ($isNew) {'),
+        strpos($source, '} elseif (! $admin->email_verified_at)', strpos($source, 'if ($isNew) {'))
+            - strpos($source, 'if ($isNew) {')
+    );
+
+    expect($newAccountBlock)
+        ->toContain("'is_disabled' => false")
+        ->toContain("'disabled_at' => null")
+        ->toContain("'disabled_reason' => null")
+        ->toContain("'is_blacklisted' => false")
+        ->toContain("'blacklisted_at' => null")
+        ->toContain("'blacklisted_reason' => null");
+});
+
+it('uses configurable example identities for optional direct bootstrap accounts', function () {
     $root = dirname(__DIR__, 2).'/database/seeders/';
-    $master = file_get_contents($root.'MasterAdminSeeder.php');
     $secondary = file_get_contents($root.'SecondarySuperAdminSeeder.php');
     $partner = file_get_contents($root.'WorldBankPartnerAccessSeeder.php');
 
-    expect($master)
-        ->toContain("public const EMAIL = 'master.admin@example.invalid'")
-        ->toContain("public const ALTERNATE_EMAIL = 'alternate.master.admin@example.invalid'")
-        ->toContain('MASTER_ADMIN_EMAILS')
-        ->toContain('MASTER_ADMIN_EMAIL')
-        ->toContain('MASTER_ADMIN_ALTERNATE_EMAIL')
-        ->and($secondary)
+    expect($secondary)
         ->toContain("public const EMAIL = 'secondary.system.admin@example.invalid'")
         ->toContain("public const NAME = 'Secondary System Administrator'")
         ->toContain('SECONDARY_SUPER_ADMIN_EMAIL')
@@ -61,7 +104,7 @@ it('uses configurable example identities for direct bootstrap accounts', functio
         ->toContain("public const EMAIL = 'world-bank.partner@example.invalid'")
         ->toContain('WORLD_BANK_PARTNER_EMAIL');
 
-    foreach ([$master, $secondary, $partner] as $source) {
+    foreach ([$secondary, $partner] as $source) {
         expect($source)->not->toMatch('/@[a-z0-9.-]+\.(?:com|org)\b/i');
     }
 

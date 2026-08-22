@@ -1,12 +1,13 @@
+@php($documentDirection = config('localization.supported.'.app()->getLocale().'.direction', 'ltr'))
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $documentDirection }}">
 
 <head>
     <meta charset="UTF-8">
-    <title>Open Procurement Opportunities | 3PAP PMIS</title>
+    <title>{{ __('procurement_public.meta_title') }}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Explore published procurement opportunities and apply through the governed 3PAP PMIS workflow.">
+    <meta name="description" content="{{ __('procurement_public.meta_description') }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
@@ -242,20 +243,20 @@
         }
     </style>
     <link rel="stylesheet" href="{{ asset('assets/css/3pap-public.css') }}">
+    @if ($documentDirection === 'rtl')
+        <link rel="stylesheet" href="{{ asset('assets/css/rtl.css') }}">
+    @endif
 </head>
 
-<body class="public-mobile-nav pmis-marketing-page" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<body class="public-mobile-nav pmis-marketing-page" dir="{{ $documentDirection }}">
     @include('partials.public-marketing-header')
 
 
 
     <section class="events-header" id="main-content" tabindex="-1">
         <div class="header-content">
-            <h1>Open Procurement Opportunities</h1>
-            <p>
-                Browse available procurement calls and submit your application
-                digitally through the 3PAP PMIS platform.
-            </p>
+            <h1>{{ __('procurement_public.hero_title') }}</h1>
+            <p>{{ __('procurement_public.hero_description') }}</p>
         </div>
     </section>
     <br>
@@ -263,8 +264,8 @@
     <br>
 
     <div class="filter-bar">
-        <input type="text" id="searchInput" placeholder="Search procurement by keyword...">
-        <button onclick="filterProcurements()">Initiate Procurement Search</button>
+        <input type="text" id="searchInput" placeholder="{{ __('procurement_public.search_placeholder') }}">
+        <button onclick="filterProcurements()">{{ __('procurement_public.search_button') }}</button>
     </div>
 
 
@@ -273,11 +274,11 @@
         @forelse($procurements as $procurement)
             <div class="event-card">
                 <div class="event-card-media">
-                    <img src="{{ $procurement->cover_image_url ?: asset('assets/images/3pap-og-image.svg') }}" alt="{{ $procurement->title }} cover image">
+                    <img src="{{ $procurement->cover_image_url ?: asset('assets/images/3pap-og-image.svg') }}" alt="{{ __('procurement_public.cover_image_alt', ['title' => $procurement->title]) }}">
                     @if($procurement->thinkTankMember)
                         <div class="event-card-owner">
                             @if($procurement->thinkTankMember->logo_url)
-                                <img src="{{ $procurement->thinkTankMember->logo_url }}" alt="{{ $procurement->thinkTankMember->name }} logo">
+                                <img src="{{ $procurement->thinkTankMember->logo_url }}" alt="{{ __('procurement_public.organization_logo_alt', ['organization' => $procurement->thinkTankMember->name]) }}">
                             @else
                                 <span>{{ Str::upper(Str::substr($procurement->thinkTankMember->name, 0, 1)) }}</span>
                             @endif
@@ -294,20 +295,20 @@
                     </p>
 
                     <div class="card-meta">
-                        <span>{{ $procurement->reference_no ?: 'Open call' }}</span>
-                        @if($procurement->application_end_date)<span>Closes {{ $procurement->application_end_date->format('d M Y') }}</span>@endif
-                        @if($procurement->activeForm)<span>{{ $procurement->activeForm->fields->count() }} form questions</span>@endif
+                        <span>{{ $procurement->reference_no ?: __('procurement_public.open_call') }}</span>
+                        @if($procurement->application_end_date)<span>{{ __('procurement_public.closes', ['date' => $procurement->application_end_date->locale(app()->getLocale())->translatedFormat('d M Y')]) }}</span>@endif
+                        @if($procurement->activeForm)<span>{{ trans_choice('procurement_public.form_questions', $procurement->activeForm->fields->count(), ['count' => $procurement->activeForm->fields->count()]) }}</span>@endif
                     </div>
 
                     <a href="{{ route('public.procurement.show', $procurement->slug) }}" class="btn-view">
-                        View Details & Apply
+                        {{ __('procurement_public.view_details_apply') }}
                     </a>
                 </div>
             </div>
 
         @empty
             <p style="grid-column:1/-1;text-align:center;font-weight:600;">
-                No open procurements at the moment.
+                {{ __('procurement_public.no_open_procurements') }}
             </p>
         @endforelse
 

@@ -1,14 +1,7 @@
 @props(['style' => 'default'])
 
 @php
-    $locales = [
-        'en' => ['short' => 'EN', 'name' => 'English'],
-        'fr' => ['short' => 'FR', 'name' => 'Français'],
-        'ar' => ['short' => 'AR', 'name' => 'العربية'],
-        'pt' => ['short' => 'PT', 'name' => 'Português'],
-        'es' => ['short' => 'ES', 'name' => 'Español'],
-        'sw' => ['short' => 'SW', 'name' => 'Kiswahili'],
-    ];
+    $locales = (array) config('localization.supported', []);
     $currentLocale = app()->getLocale();
     $current = $locales[$currentLocale] ?? ['short' => strtoupper($currentLocale), 'name' => $currentLocale];
     static $languageSelectorInstance = 0;
@@ -315,6 +308,27 @@
 .mobile-nav-actions .lang-switcher.open .lang-menu {
     transform: translateY(0);
 }
+
+/* The redesigned public header is light, while the default control is made
+   for dark application headers. Keep the landing selector clearly visible. */
+.pmis-header__actions .lang-btn {
+    background: #fff;
+    border-color: #cfdbe8;
+    box-shadow: 0 4px 12px rgba(6, 21, 47, .08);
+    color: #06152f;
+}
+
+.pmis-header__actions .lang-btn:hover,
+.pmis-header__actions .lang-switcher.open .lang-btn {
+    background: #f3f8fc;
+    border-color: #83a6c5;
+    box-shadow: 0 7px 18px rgba(6, 21, 47, .13);
+}
+
+.pmis-header__actions .lang-globe {
+    background: #e8f2fa;
+    color: #075985;
+}
 </style>
 @endonce
 @endif
@@ -352,7 +366,7 @@
                    class="{{ $currentLocale === $locale ? 'lang-active' : '' }}">
                     <span class="lang-code">{{ $info['short'] }}</span>
                     <span class="lang-name">{{ $info['name'] }}</span>
-                    <span class="lang-check" aria-hidden="true">✓</span>
+                    <span class="lang-check" aria-hidden="true">&#10003;</span>
                 </a>
             </li>
         @endforeach

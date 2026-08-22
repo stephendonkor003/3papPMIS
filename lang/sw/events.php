@@ -1,0 +1,17 @@
+<?php
+
+return [
+    'meta' => ['title' => 'Matukio na semina za mtandaoni | 3PAP PMIS', 'description' => 'Gundua matukio, maonesho ya bidhaa na vipindi vya wataalamu vya 3PAP PMIS kwa usimamizi wa portifolio uliounganishwa na wenye uwajibikaji.'],
+    'hero' => ['eyebrow' => 'Mabadilishano ya maarifa ya 3PAP PMIS', 'title' => 'Matukio na semina za mtandaoni', 'lead' => 'Mazungumzo ya vitendo kwa viongozi na timu za utekelezaji zinazogeuza mkakati kuwa utekelezaji unaoonekana na wenye utawala katika portifolio, programu, miradi na mifuko.', 'ask' => 'Uliza kuhusu vipindi vijavyo', 'faqs' => 'Gundua maswali yanayoulizwa mara kwa mara', 'mail_subject' => 'Swali kuhusu tukio la 3PAP PMIS'],
+    'brief' => ['aria_label' => 'Lengo la kipindi', 'label' => 'Lengo la kipindi', 'title' => 'Mwonekano mmoja wenye utawala wa utekelezaji wa shirika', 'items' => ['Mwonekano wa portifolio na programu kwa watoa maamuzi', 'Mitiririko iliyounganishwa ya fedha, ununuzi, hatari na utendaji', 'Ushahidi unaofuatilika na ripoti tayari kwa maamuzi']],
+    'schedule' => ['kicker' => 'Ratiba', 'title' => 'Vipindi vya umma vijavyo', 'description' => 'Vipindi vilivyothibitishwa vitachapishwa hapa pamoja na tarehe, muundo, hadhira na maelezo ya usajili.', 'empty_title' => 'Hakuna vipindi vya umma vilivyopangwa kwa sasa', 'empty_description' => 'Kwa mazungumzo maalumu, wasiliana na timu ya 3PAP ukitaja shirika lako na matumizi ya kipaumbele.', 'visit' => 'Tembelea 3pap.africa'],
+    'formats' => ['kicker' => 'Unachoweza kutarajia', 'title' => 'Vipindi vilivyoundwa kuhusu kazi halisi ya utekelezaji', 'description' => 'Kila muundo huunganisha uwezo wa jukwaa na maswali ya kila siku ya utawala, uratibu na utoaji wa taarifa.', 'items' => [
+        ['label' => 'ONESHA', 'title' => 'Maonesho ya jukwaa', 'description' => 'Ona jinsi PMIS inavyounganisha portifolio, programu, miradi, mifuko, ununuzi, watu na utendaji katika mazingira moja.'],
+        ['label' => 'TEKELEZA', 'title' => 'Maelezo ya utekelezaji', 'description' => 'Gundua utawala unaoweza kusanidiwa, mitiririko kwa majukumu, ujumuishaji na njia ya vitendo hadi kupokelewa.'],
+        ['label' => 'BADILISHANA', 'title' => 'Mabadilishano ya wataalamu', 'description' => 'Shiriki mbinu za uangalizi, utawala wa fedha, uhakikisho wa utekelezaji, ushahidi na msaada wa maamuzi.'],
+    ]],
+    'lifecycle' => ['kicker' => 'Mzunguko uliounganishwa', 'title' => 'Kutoka kipaumbele cha mkakati hadi matokeo yaliyothibitishwa', 'description' => 'Programu yetu hufuata mzunguko kamili wa utekelezaji ili muktadha, wajibu na ushahidi viendelee kuunganishwa.', 'aria_label' => 'Mzunguko wa utekelezaji wa PMIS', 'items' => [
+        ['title' => 'Panga vipaumbele', 'description' => 'Linganisha mahitaji na uwekezaji na mkakati.'], ['title' => 'Panga', 'description' => 'Panga matokeo, rasilimali na vidhibiti.'], ['title' => 'Tekeleza', 'description' => 'Ratibu kazi, washirika na maamuzi.'], ['title' => 'Hakikisha', 'description' => 'Fuatilia utendaji, hatari na ushahidi.'], ['title' => 'Jifunze', 'description' => 'Tathmini matokeo na boresha uwekezaji.'],
+    ]],
+    'cta' => ['kicker' => 'Anza mazungumzo', 'title' => 'Unahitaji kipindi kilichoundwa kwa taasisi yako?', 'description' => 'Tuambie kuhusu mazingira yako ya utekelezaji, timu zinazohusika na maamuzi ambayo PMIS inapaswa kusaidia.', 'contact' => 'Wasiliana na timu ya 3PAP', 'mail_subject' => 'Kipindi maalumu cha 3PAP PMIS'],
+];

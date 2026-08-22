@@ -53,6 +53,7 @@ class DatabaseSeeder extends Seeder
             BiAnnualSiteVisitQuestionnaireSeeder::class,
             RolePermissionSeeder::class,
             SystemAdminAccessSeeder::class,
+            MasterAdminSeeder::class,
         ]);
     }
 }

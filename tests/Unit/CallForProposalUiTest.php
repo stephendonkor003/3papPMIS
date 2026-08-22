@@ -30,7 +30,7 @@ it('renders closed opportunities through the shared 3PAP PMIS public experience'
 
     expect($header)
         ->toContain("request()->routeIs('public.grievances.*') ? 'active' : ''")
-        ->toContain('Portfolio Management Information System');
+        ->toContain("__('public.brand_subtitle')");
 });
 
 it('does not load the think tank directory while submissions are closed', function () {
