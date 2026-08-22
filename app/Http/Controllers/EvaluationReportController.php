@@ -87,7 +87,7 @@ class EvaluationReportController extends Controller
             'submission' => $submission,
             'overallMax' => $overallMax,
             'anonymised' => $anonymised,
-            'platformName' => 'Africa Think Tank Platform',
+            'platformName' => config('app.name', '3PAP PMIS'),
             'platformUrl' => rtrim(config('app.url') ?: url('/'), '/'),
             'logoDataUri' => $this->logoDataUri(),
         ])->setPaper('a4', 'portrait');
@@ -97,12 +97,20 @@ class EvaluationReportController extends Controller
 
     private function logoDataUri(): ?string
     {
-        $path = public_path('assets/images/attp-logo.jpeg');
+        $relativePath = trim((string) config('app.report_logo_path'), '/\\');
+        if ($relativePath === '') {
+            return null;
+        }
+
+        $path = public_path($relativePath);
 
         if (! is_file($path)) {
             return null;
         }
 
+        $mimeType = mime_content_type($path) ?: 'image/png';
+
+        return 'data:'.$mimeType.';base64,'.base64_encode(file_get_contents($path));
     }
 
     public function procurement(Procurement $procurement)

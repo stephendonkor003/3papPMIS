@@ -117,7 +117,7 @@ class EvaluationController extends Controller
         $overallTotal = (float) $sectionTotals->sum();
         $reportGeneratedAt = now(config('app.timezone', 'UTC'));
         $generatedBy = auth()->user();
-        $documentReference = 'ATTP-EVAL-'
+        $documentReference = 'PROC-EVAL-'
             .Str::upper(Str::substr((string) $evaluation->getKey(), 0, 8))
             .'-'.$reportGeneratedAt->format('Ymd');
 

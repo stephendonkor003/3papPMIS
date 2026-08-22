@@ -225,9 +225,11 @@ class EvaluationAssignmentController extends Controller
         return $procurements
             ->mapWithKeys(function (Procurement $procurement) use ($portfolioByNodeId) {
                 return [
-                    (string) $procurement->id => $procurement->governance_node_id
-                        ? ($portfolioByNodeId[(string) $procurement->governance_node_id] ?? null)
-                        : null,
+                    (string) $procurement->id => $procurement->portfolio_id
+                        ? (string) $procurement->portfolio_id
+                        : ($procurement->governance_node_id
+                            ? ($portfolioByNodeId[(string) $procurement->governance_node_id] ?? null)
+                            : null),
                 ];
             })
             ->all();
@@ -235,6 +237,10 @@ class EvaluationAssignmentController extends Controller
 
     private function portfolioIdForProcurement(Procurement $procurement): ?string
     {
+        if ($procurement->portfolio_id) {
+            return (string) $procurement->portfolio_id;
+        }
+
         if (! $procurement->governance_node_id) {
             return null;
         }

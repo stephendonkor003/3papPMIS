@@ -181,7 +181,7 @@ class PrescreeningEvaluationController extends Controller
             'criteria' => $criteria,
             'evaluations' => $evaluations,
             'anonymised' => $anonymised,
-            'platformName' => 'Africa Think Tank Platform',
+            'platformName' => config('app.name', '3PAP PMIS'),
             'platformUrl' => rtrim(config('app.url') ?: url('/'), '/'),
             'logoDataUri' => $this->logoDataUri(),
         ])->setPaper('a4', 'portrait');
@@ -216,13 +216,20 @@ class PrescreeningEvaluationController extends Controller
 
     private function logoDataUri(): ?string
     {
-        $path = public_path('assets/images/attp-logo.jpeg');
+        $relativePath = trim((string) config('app.report_logo_path'), '/\\');
+        if ($relativePath === '') {
+            return null;
+        }
+
+        $path = public_path($relativePath);
 
         if (! is_file($path)) {
             return null;
         }
 
-        return 'data:image/jpeg;base64,' . base64_encode(file_get_contents($path));
+        $mimeType = mime_content_type($path) ?: 'image/png';
+
+        return 'data:'.$mimeType.';base64,'.base64_encode(file_get_contents($path));
     }
 
     /**

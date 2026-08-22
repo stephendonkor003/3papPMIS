@@ -257,7 +257,7 @@
 <body>
     @php
         $anonymised = $anonymised ?? false;
-        $platformName = $platformName ?? 'Africa Think Tank Platform';
+        $platformName = $platformName ?? config('app.name', '3PAP PMIS');
         $platformUrl = $platformUrl ?? rtrim(config('app.url') ?: url('/'), '/');
         $criteria = isset($criteria) ? collect($criteria) : collect();
         if ($criteria->isEmpty()) {

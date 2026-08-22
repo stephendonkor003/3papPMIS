@@ -18,6 +18,7 @@ class Procurement extends BaseModel
         'procurement_owner_type',
         'oversight_status',
         'governance_node_id',
+        'portfolio_id',
         'title',
         'slug',
         'reference_no',
@@ -99,6 +100,11 @@ class Procurement extends BaseModel
     public function resource()
     {
         return $this->belongsTo(Resource::class, 'resource_id');
+    }
+
+    public function portfolio()
+    {
+        return $this->belongsTo(Sector::class, 'portfolio_id');
     }
 
     public function consortium()

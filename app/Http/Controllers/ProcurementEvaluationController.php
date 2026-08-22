@@ -124,6 +124,10 @@ class ProcurementEvaluationController extends Controller
 
     private function portfolioIdForProcurement(Procurement $procurement): ?string
     {
+        if ($procurement->portfolio_id) {
+            return (string) $procurement->portfolio_id;
+        }
+
         if (! $procurement->governance_node_id) {
             return null;
         }

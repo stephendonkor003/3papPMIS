@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             SystemAdminAccessSeeder::class,
             MasterAdminSeeder::class,
             KenyaGovernmentSeeder::class,
+            KenyaProcurementEvaluationSeeder::class,
         ]);
     }
 }

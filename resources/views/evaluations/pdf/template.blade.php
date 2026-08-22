@@ -452,7 +452,7 @@
     $subtotalCount = $sectionOutline->filter(fn (array $node): bool => (bool) $node['section']->show_subtotal)->count();
     $generatedAt = $reportGeneratedAt ?? now(config('app.timezone', 'UTC'));
     $generator = $generatedBy ?? auth()->user();
-    $reference = $documentReference ?? 'ATTP-EVAL-'.strtoupper(substr((string) $evaluation->getKey(), 0, 8));
+    $reference = $documentReference ?? 'PROC-EVAL-'.strtoupper(substr((string) $evaluation->getKey(), 0, 8));
     $statusLabel = $evaluation->status === 'close' ? 'Closed' : ucfirst((string) $evaluation->status);
     $palette = [
         ['accent' => '#3157d5', 'soft' => '#eef2ff', 'deep' => '#203b98'],
@@ -471,7 +471,7 @@
         <tr>
             <td class="brand-cell">
                 <span class="logo-frame">
-                    <img src="{{ public_path('assets/images/attp-logo.jpeg') }}" alt="Africa Think Tank Platform">
+                    {{ config('app.name', '3PAP PMIS') }}
                 </span>
             </td>
             <td>

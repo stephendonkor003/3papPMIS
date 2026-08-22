@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Services\LegacyAttpDemoDataCleaner;
+use App\Services\KenyaProcurementEvaluationDataCleaner;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Seeder;
@@ -72,6 +73,7 @@ class KenyaGovernmentSeeder extends Seeder
         $this->now = now()->format('Y-m-d H:i:s');
 
         $result = DB::transaction(function () use ($catalogue): array {
+            app(KenyaProcurementEvaluationDataCleaner::class)->purge();
             $removed = app(LegacyAttpDemoDataCleaner::class)->purge();
             $adminId = $this->resolveAdminId();
             $levelIds = $this->seedLevels();

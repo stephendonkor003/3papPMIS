@@ -77,7 +77,7 @@ class ProcurementSiteVisitReportController extends Controller
             'procurement' => $procurement,
             'siteVisit' => $siteVisit,
             'anonymised' => $anonymised,
-            'platformName' => 'Africa Think Tank Platform',
+            'platformName' => config('app.name', '3PAP PMIS'),
             'platformUrl' => rtrim(config('app.url') ?: url('/'), '/'),
             'logoDataUri' => $this->logoDataUri(),
         ])
@@ -87,13 +87,20 @@ class ProcurementSiteVisitReportController extends Controller
 
     private function logoDataUri(): ?string
     {
-        $path = public_path('assets/images/attp-logo.jpeg');
-
-        if (!is_file($path)) {
+        $relativePath = trim((string) config('app.report_logo_path'), '/\\');
+        if ($relativePath === '') {
             return null;
         }
 
-        return 'data:image/jpeg;base64,' . base64_encode(file_get_contents($path));
+        $path = public_path($relativePath);
+
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $mimeType = mime_content_type($path) ?: 'image/png';
+
+        return 'data:'.$mimeType.';base64,'.base64_encode(file_get_contents($path));
     }
 
 

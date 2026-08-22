@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', '3PAP PMIS'),
 
+    'report_logo_path' => env('REPORT_LOGO_PATH'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

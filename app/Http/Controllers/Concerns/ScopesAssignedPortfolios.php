@@ -330,15 +330,22 @@ trait ScopesAssignedPortfolios
 
     protected function applyAssignedPortfolioScopeToProcurements($query, ?User $user = null): void
     {
+        $portfolioIds = $this->assignedPortfolioIds($user);
         $nodeIds = $this->assignedPortfolioNodeIds($user);
 
-        if (empty($nodeIds)) {
+        if (empty($portfolioIds)) {
             $query->whereRaw('1 = 0');
             return;
         }
 
-        $query->whereIn('governance_node_id', $nodeIds)
-            ->whereNotNull('governance_node_id');
+        $query->where(function ($scope) use ($portfolioIds, $nodeIds): void {
+            $scope->whereIn('portfolio_id', $portfolioIds)
+                ->orWhere(function ($legacyScope) use ($nodeIds): void {
+                    $legacyScope->whereNull('portfolio_id')
+                        ->whereIn('governance_node_id', $nodeIds)
+                        ->whereNotNull('governance_node_id');
+                });
+        });
     }
 
     protected function applyAssignedPortfolioScopeToEvaluations($query, ?User $user = null): void
@@ -580,6 +587,10 @@ trait ScopesAssignedPortfolios
 
     protected function procurementIsInAssignedPortfolio(Procurement $procurement, ?User $user = null): bool
     {
+        if ($procurement->portfolio_id) {
+            return in_array((string) $procurement->portfolio_id, $this->assignedPortfolioIds($user), true);
+        }
+
         return $procurement->governance_node_id
             && in_array((string) $procurement->governance_node_id, $this->assignedPortfolioNodeIds($user), true);
     }
