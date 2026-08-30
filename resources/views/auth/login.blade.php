@@ -530,7 +530,7 @@
                 </div>
             </div>
 
-            <div class="brand-foot">&copy; {{ date('Y') }} 3PAP &middot; info@3pap.com</div>
+            <div class="brand-foot">&copy; {{ date('Y') }} 3PAP &middot; info@3pap.africa</div>
         </div>
     </div>
 

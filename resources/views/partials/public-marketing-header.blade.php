@@ -19,7 +19,7 @@
 <div class="pmis-utility">
     <div class="pmis-container pmis-utility__inner">
         <span>{{ __('public.utility_tagline') }}</span>
-        <a href="mailto:info@3pap.com">info@3pap.com</a>
+        <a href="mailto:info@3pap.africa">info@3pap.africa</a>
     </div>
 </div>
 

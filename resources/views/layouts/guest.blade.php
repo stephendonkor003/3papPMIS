@@ -60,7 +60,7 @@
             <div class="pmis-guest-card">
                 {{ $slot }}
             </div>
-            <p class="pmis-guest-support">Need help? <a href="mailto:info@3pap.com">info@3pap.com</a></p>
+            <p class="pmis-guest-support">Need help? <a href="mailto:info@3pap.africa">info@3pap.africa</a></p>
         </div>
     </body>
 </html>

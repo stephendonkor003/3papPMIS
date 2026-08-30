@@ -86,12 +86,12 @@ return [
     'footer_link_process' => 'Cycle de vie de portefeuille gouverné',
     'footer_link_oversight' => 'Supervision des portefeuilles',
     'footer_contact_title' => 'Contact',
-    'footer_email' => 'E-mail : info@3pap.com',
+    'footer_email' => 'E-mail : info@3pap.africa',
     'footer_copyright' => '© :year 3PAP. Tous droits réservés.',
 
     // Contact Section
     'contact_email' => 'E-mail',
-    'contact_info' => 'info@3pap.com',
+    'contact_info' => 'info@3pap.africa',
 
     // Legacy Footer
     'footer_tagline' => 'Une exécution d’entreprise connectée, de la stratégie institutionnelle à une mise en œuvre visible et gouvernée.',

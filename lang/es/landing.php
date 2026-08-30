@@ -86,12 +86,12 @@ return [
     'footer_link_process' => 'Ciclo de Vida Gobernado del Portafolio',
     'footer_link_oversight' => 'Supervisión de Portafolios',
     'footer_contact_title' => 'Contacto',
-    'footer_email' => 'Correo electrónico: info@3pap.com',
+    'footer_email' => 'Correo electrónico: info@3pap.africa',
     'footer_copyright' => '© :year 3PAP. Todos los derechos reservados.',
 
     // Contact Section
     'contact_email' => 'Correo Electrónico',
-    'contact_info' => 'info@3pap.com',
+    'contact_info' => 'info@3pap.africa',
 
     // Legacy Footer
     'footer_tagline' => 'Ejecución empresarial conectada, desde la estrategia institucional hasta una entrega visible y gobernada.',

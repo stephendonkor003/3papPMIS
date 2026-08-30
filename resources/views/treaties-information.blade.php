@@ -831,7 +831,7 @@
         </div>
         <div class="footer-contact">
             <h4>Contact</h4>
-            <p>Email: info@3pap.com</p>
+            <p>Email: info@3pap.africa</p>
             <p>&copy; 2026 3PAP Portfolio Management Information System (3PAP PMIS)</p>
         </div>
     </div>

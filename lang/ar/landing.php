@@ -86,12 +86,12 @@ return [
     'footer_link_process' => 'دورة حياة المحافظ الخاضعة للحوكمة',
     'footer_link_oversight' => 'الإشراف على المحافظ',
     'footer_contact_title' => 'اتصل بنا',
-    'footer_email' => 'البريد الإلكتروني: info@3pap.com',
+    'footer_email' => 'البريد الإلكتروني: info@3pap.africa',
     'footer_copyright' => '© :year 3PAP. جميع الحقوق محفوظة.',
 
     // Contact Section
     'contact_email' => 'البريد الإلكتروني',
-    'contact_info' => 'info@3pap.com',
+    'contact_info' => 'info@3pap.africa',
 
     // Legacy Footer
     'footer_tagline' => 'تنفيذ مؤسسي مترابط يحوّل الاستراتيجية إلى نتائج واضحة وخاضعة للحوكمة.',

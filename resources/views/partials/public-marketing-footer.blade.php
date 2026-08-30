@@ -30,7 +30,7 @@
         </div>
         <div>
             <h2>{{ __('public.footer.contact') }}</h2>
-            <a href="mailto:info@3pap.com">info@3pap.com</a>
+            <a href="mailto:info@3pap.africa">info@3pap.africa</a>
             <a href="https://3pap.africa" target="_blank" rel="noopener noreferrer">3pap.africa</a>
             <a href="{{ route('public.grievances.create') }}">{{ __('public.footer.feedback') }}</a>
         </div>

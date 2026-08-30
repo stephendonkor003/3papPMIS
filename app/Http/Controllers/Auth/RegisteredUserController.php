@@ -15,7 +15,7 @@ class RegisteredUserController extends Controller
     {
         return redirect()
             ->route('login')
-            ->with('status', 'Self-service registration is not available. Contact info@3pap.com if you need PMIS access.');
+            ->with('status', 'Self-service registration is not available. Contact info@3pap.africa if you need PMIS access.');
     }
 
     /**

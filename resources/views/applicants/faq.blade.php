@@ -375,7 +375,7 @@
                             <span class="pmis-faq__toggle" aria-hidden="true"></span>
                         </summary>
                         <div class="pmis-faq__answer">
-                            <p>Email <a href="mailto:info@3pap.com">info@3pap.com</a> with your organisation, priority use case and preferred timeframe to request a relevant product session. Public opportunities are listed on the <a href="{{ route('applicants.create') }}">Opportunities page</a>; there are currently no open calls or online submissions.</p>
+                            <p>Email <a href="mailto:info@3pap.africa">info@3pap.africa</a> with your organisation, priority use case and preferred timeframe to request a relevant product session. Public opportunities are listed on the <a href="{{ route('applicants.create') }}">Opportunities page</a>; there are currently no open calls or online submissions.</p>
                         </div>
                     </details>
                 </div>
@@ -418,7 +418,7 @@
                     </div>
                     <div class="pmis-faq__actions">
                         <a class="pmis-faq__button" href="{{ route('events') }}">Events &amp; webinars</a>
-                        <a class="pmis-faq__button pmis-faq__button--primary" href="mailto:info@3pap.com?subject=3PAP%20PMIS%20enquiry">
+                        <a class="pmis-faq__button pmis-faq__button--primary" href="mailto:info@3pap.africa?subject=3PAP%20PMIS%20enquiry">
                             Contact 3PAP <span aria-hidden="true">&rarr;</span>
                         </a>
                     </div>

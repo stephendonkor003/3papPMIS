@@ -75,7 +75,7 @@ class PasswordResetLinkController extends Controller
         return back()
             ->withInput($request->only('email'))
             ->withErrors([
-                'email' => 'Password reset is temporarily unavailable. Please try again shortly or contact 3PAP PMIS support at info@3pap.com.',
+                'email' => 'Password reset is temporarily unavailable. Please try again shortly or contact 3PAP PMIS support at info@3pap.africa.',
             ]);
     }
 

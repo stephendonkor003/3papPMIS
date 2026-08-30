@@ -268,7 +268,7 @@
                     <h1 id="events-title">{{ __('events.hero.title') }}</h1>
                     <p class="pmis-events__lead">{{ __('events.hero.lead') }}</p>
                     <div class="pmis-events__actions">
-                        <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.com?subject={{ rawurlencode(__('events.hero.mail_subject')) }}">
+                        <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.africa?subject={{ rawurlencode(__('events.hero.mail_subject')) }}">
                             {{ __('events.hero.ask') }} <span aria-hidden="true">&rarr;</span>
                         </a>
                         <a class="pmis-events__button pmis-events__button--quiet" href="{{ route('applicants.faq') }}">{{ __('events.hero.faqs') }}</a>
@@ -360,7 +360,7 @@
                         <h2 id="event-contact-title">{{ __('events.cta.title') }}</h2>
                         <p>{{ __('events.cta.description') }}</p>
                     </div>
-                    <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.com?subject={{ rawurlencode(__('events.cta.mail_subject')) }}">
+                    <a class="pmis-events__button pmis-events__button--primary" href="mailto:info@3pap.africa?subject={{ rawurlencode(__('events.cta.mail_subject')) }}">
                         {{ __('events.cta.contact') }} <span aria-hidden="true">&rarr;</span>
                     </a>
                 </div>

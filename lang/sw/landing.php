@@ -86,12 +86,12 @@ return [
     'footer_link_process' => 'Mzunguko wa Portifolio Wenye Utawala',
     'footer_link_oversight' => 'Uangalizi wa Portifolio',
     'footer_contact_title' => 'Wasiliana',
-    'footer_email' => 'Barua Pepe: info@3pap.com',
+    'footer_email' => 'Barua Pepe: info@3pap.africa',
     'footer_copyright' => '© :year 3PAP. Haki zote zimehifadhiwa.',
 
     // Contact Section
     'contact_email' => 'Barua Pepe',
-    'contact_info' => 'info@3pap.com',
+    'contact_info' => 'info@3pap.africa',
 
     // Legacy Footer
     'footer_tagline' => 'Utekelezaji wa biashara uliounganishwa, kutoka mkakati wa taasisi hadi matokeo yanayoonekana na yenye utawala.',

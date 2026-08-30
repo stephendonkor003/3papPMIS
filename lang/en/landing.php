@@ -86,12 +86,12 @@ return [
     'footer_link_process' => 'Governed Portfolio Lifecycle',
     'footer_link_oversight' => 'Portfolio Oversight',
     'footer_contact_title' => 'Contact',
-    'footer_email' => 'Email: info@3pap.com',
+    'footer_email' => 'Email: info@3pap.africa',
     'footer_copyright' => '© :year 3PAP. All rights reserved.',
 
     // Contact Section
     'contact_email' => 'Email',
-    'contact_info' => 'info@3pap.com',
+    'contact_info' => 'info@3pap.africa',
 
     // Legacy Footer
     'footer_tagline' => 'Enterprise execution, connected—turning institutional strategy into visible, governed delivery.',
